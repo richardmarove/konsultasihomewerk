@@ -109,34 +109,58 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <h3 class="font-bold text-slate-700 border-b pb-2">Tes Gaya Belajar (VAK - Visual, Auditori, Kinestetik)</h3>
                 <div class="space-y-2">
                     <label class="block text-sm text-slate-600">Q1: Kalau ada pelajaran baru, aku lebih cepat paham jika...</label>
-                    <div class="flex items-center space-x-4">
-                        <input type="radio" name="q1_suasana_rumah" value="Visual" class="form-radio" required> <span class="text-slate-700">Membaca buku atau melihat slide presentasi guru.</span>
-                        <input type="radio" name="q1_suasana_rumah" value="Auditori" class="form-radio"> <span class="text-slate-700">Mendengarkan penjelasan guru atau diskusi teman.</span>
-                        <input type="radio" name="q1_suasana_rumah" value="Kinestetik" class="form-radio"> <span class="text-slate-700">Mempraktikkannya langsung atau melakukan eksperimen.</span>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <input type="radio" name="q1_gaya_belajar" value="Visual" class="form-radio" required> <span class="ml-2 text-slate-700">Membaca buku atau melihat slide presentasi guru.</span>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" name="q1_gaya_belajar" value="Auditori" class="form-radio"> <span class="ml-2 text-slate-700">Mendengarkan penjelasan guru atau diskusi teman.</span>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" name="q1_gaya_belajar" value="Kinestetik" class="form-radio"> <span class="ml-2 text-slate-700">Mempraktikkannya langsung atau melakukan eksperimen.</span>
+                        </div>
                     </div>
                 </div>
                 <div class="space-y-2">
                     <label class="block text-sm text-slate-600">Q2: Saat waktu luang, aku lebih suka...</label>
-                    <div class="flex items-center space-x-4">
-                        <input type="radio" name="q2_suasana_rumah" value="Visual" class="form-radio" required> <span class="text-slate-700">Nonton film, baca komik/novel, scroll Instagram/TikTok.</span>
-                        <input type="radio" name="q2_suasana_rumah" value="Auditori" class="form-radio"> <span class="text-slate-700">Dengar musik, podcast, atau ngobrol/curhat.</span>
-                        <input type="radio" name="q2_suasana_rumah" value="Kinestetik" class="form-radio"> <span class="text-slate-700">Olahraga, jalan-jalan, gaming, atau bikin kerajinan tangan.</span>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <input type="radio" name="q2_gaya_belajar" value="Visual" class="form-radio" required> <span class="ml-2 text-slate-700">Nonton film, baca komik/novel, scroll Instagram/TikTok.</span>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" name="q2_gaya_belajar" value="Auditori" class="form-radio"> <span class="ml-2 text-slate-700">Dengar musik, podcast, atau ngobrol/curhat.</span>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" name="q2_gaya_belajar" value="Kinestetik" class="form-radio"> <span class="ml-2 text-slate-700">Olahraga, jalan-jalan, gaming, atau bikin kerajinan tangan.</span>
+                        </div>
                     </div>
                 </div>
                 <div class="space-y-2">
                     <label class="block text-sm text-slate-600">Q3: Kalau aku lupa jalan ke suatu tempat, aku biasanya...</label>
-                    <div class="flex items-center space-x-4">
-                        <input type="radio" name="q3_suasana_rumah" value="Visual" class="form-radio" required> <span class="text-slate-700">Membayangkan peta atau patokan gedung yang pernah kulihat.</span>
-                        <input type="radio" name="q3_suasana_rumah" value="Auditori" class="form-radio"> <span class="text-slate-700">Bertanya pada orang lain.</span>
-                        <input type="radio" name="q3_suasana_rumah" value="Kinestetik" class="form-radio"> <span class="text-slate-700">Jalan saja dulu, nanti tubuhku "ingat" sendiri jalannya.</span>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <input type="radio" name="q3_gaya_belajar" value="Visual" class="form-radio" required> <span class="ml-2 text-slate-700">Membayangkan peta atau patokan gedung yang pernah kulihat.</span>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" name="q3_gaya_belajar" value="Auditori" class="form-radio"> <span class="ml-2 text-slate-700">Bertanya pada orang lain.</span>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" name="q3_gaya_belajar" value="Kinestetik" class="form-radio"> <span class="ml-2 text-slate-700">Jalan saja dulu, nanti tubuhku "ingat" sendiri jalannya.</span>
+                        </div>
                     </div>
                 </div>
                 <div class="space-y-2">
                     <label class="block text-sm text-slate-600">Q4: Saat marah atau kesal, aku biasanya...</label>
-                    <div class="flex items-center space-x-4">
-                        <input type="radio" name="q4_suasana_rumah" value="Visual" class="form-radio" required> <span class="text-slate-700">Cemberut, diam, atau menangis (ekspresi wajah berubah).</span>
-                        <input type="radio" name="q4_suasana_rumah" value="Auditori" class="form-radio"> <span class="text-slate-700">Mengomel, teriak, atau curhat panjang lebar.</span>
-                        <input type="radio" name="q4_suasana_rumah" value="Kinestetik" class="form-radio"> <span class="text-slate-700">Membanting pintu, memukul bantal, atau pergi keluar rumah (fisik).</span>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <input type="radio" name="q4_gaya_belajar" value="Visual" class="form-radio" required> <span class="ml-2 text-slate-700">Cemberut, diam, atau menangis (ekspresi wajah berubah).</span>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" name="q4_gaya_belajar" value="Auditori" class="form-radio"> <span class="ml-2 text-slate-700">Mengomel, teriak, atau curhat panjang lebar.</span>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" name="q4_gaya_belajar" value="Kinestetik" class="form-radio"> <span class="ml-2 text-slate-700">Membanting pintu, memukul bantal, atau pergi keluar rumah (fisik).</span>
+                        </div>
                     </div>
                 </div>
             </div>
