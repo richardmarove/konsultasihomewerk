@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($conn->query($sql) === TRUE) {
         // Setelah sukses isi data keluarga, anggap onboarding selesai
         // Opsional: Anda bisa lanjut redirect ke form asesmen (gaya belajar) jika mau
-        header("Location: dashboard_siswa.php");
+        header("Location: modul_asesmen_2.php");
     } else {
         echo "Error: " . $conn->error;
     }
