@@ -68,6 +68,30 @@ if ($vak_data) {
         $dominant_desc = "Kamu memiliki gaya belajar kombinasi! Ini berarti kamu fleksibel dan bisa menggunakan beberapa cara belajar sekaligus untuk memahami materi dengan lebih baik.";
     }
 }
+
+// Proses Konsultasi
+$msg_konsul = "";
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_konsul'])) {
+    $id_konselor = $_POST['id_konselor'];
+    $topik = $_POST['topik'];
+    $keluhan = $_POST['keluhan'];
+    $tanggal = $_POST['tanggal'];
+    $jam = $_POST['jam'];
+    $metode = $_POST['metode'];
+    
+    $tgl_waktu = $tanggal . ' ' . $jam . ':00';
+
+    $stmt = $conn->prepare("INSERT INTO konsultasi (id_siswa, id_konselor, kategori_topik, deskripsi_keluhan, tanggal_konsultasi, status, metode_konsultasi) VALUES (?, ?, ?, ?, ?, 'menunggu', ?)");
+    $stmt->bind_param("iissss", $id_siswa, $id_konselor, $topik, $keluhan, $tgl_waktu, $metode);
+    
+    if ($stmt->execute()) {
+        $msg_konsul = "<div class='bg-green-100 text-green-700 p-4 rounded mb-6'>Permintaan konsultasi berhasil dikirim! Tunggu konfirmasi dari guru ya.</div>";
+    } else {
+        $msg_konsul = "<div class='bg-red-100 text-red-700 p-4 rounded mb-6'>Gagal mengirim permintaan: " . $conn->error . "</div>";
+    }
+}
+
+$list_konselor = $conn->query("SELECT id, nama_lengkap FROM konselor");
 ?>
 
 <!DOCTYPE html>
@@ -95,6 +119,8 @@ if ($vak_data) {
 
     <div class="container mx-auto p-6 flex-grow">
         
+        <?= $msg_konsul ?>
+
         <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-8 rounded-2xl shadow-lg mb-8 relative overflow-hidden">
             <div class="relative z-10">
                 <h2 class="text-3xl md:text-4xl font-bold mb-2">Selamat Datang, <?= explode(' ', $student['nama_lengkap'])[0] ?>! 👋</h2>
@@ -112,9 +138,9 @@ if ($vak_data) {
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
                         Jadwal Konsultasi
                     </h3>
-                    <p class="text-slate-500 text-sm mb-6">Belum ada jadwal konsultasi yang akan datang.</p>
-                    <button class="w-full bg-blue-50 text-blue-600 px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-100 transition">
-                        Buat Janji Temu
+                    <p class="text-slate-500 text-sm mb-6">Ingin curhat atau butuh bimbingan? Buat janji temu sekarang.</p>
+                    <button onclick="document.getElementById('modalKonsul').showModal()" class="w-full bg-blue-50 text-blue-600 px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-100 transition">
+                        Buat Janji Tamu
                     </button>
                 </div>
             </div>
@@ -157,6 +183,68 @@ if ($vak_data) {
 
         </div>
     </div>
+
+    <dialog id="modalKonsul" class="modal p-0 rounded-xl shadow-2xl backdrop:bg-black/50 w-full max-w-lg">
+        <div class="bg-white p-6">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="font-bold text-lg text-slate-800">Buat Janji Konsultasi</h3>
+                <button onclick="document.getElementById('modalKonsul').close()" class="text-slate-400 hover:text-slate-600">&times;</button>
+            </div>
+            
+            <form method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Pilih Guru BK</label>
+                    <select name="id_konselor" required class="w-full border rounded px-3 py-2 text-sm">
+                        <option value="">-- Pilih Guru --</option>
+                        <?php while($k = $list_konselor->fetch_assoc()): ?>
+                            <option value="<?= $k['id'] ?>"><?= $k['nama_lengkap'] ?></option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Topik</label>
+                        <select name="topik" required class="w-full border rounded px-3 py-2 text-sm">
+                            <option value="Akademik">Akademik</option>
+                            <option value="Pribadi">Pribadi</option>
+                            <option value="Sosial">Sosial</option>
+                            <option value="Karir">Karir</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Metode</label>
+                        <select name="metode" required class="w-full border rounded px-3 py-2 text-sm">
+                            <option value="offline">Tatap Muka (Offline)</option>
+                            <option value="online">Daring (Online)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tanggal</label>
+                        <input type="date" name="tanggal" required class="w-full border rounded px-3 py-2 text-sm" min="<?= date('Y-m-d') ?>">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Jam</label>
+                        <input type="time" name="jam" required class="w-full border rounded px-3 py-2 text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Keluhan / Masalah</label>
+                    <textarea name="keluhan" rows="3" required class="w-full border rounded px-3 py-2 text-sm" placeholder="Ceritakan sedikit apa yang ingin kamu bahas..."></textarea>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" name="submit_konsul" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition">
+                        Kirim Permintaan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </dialog>
 
     <script>
         <?php if ($vak_data): ?>
