@@ -2,7 +2,6 @@
 session_start();
 include 'config/database.php';
 
-// 1. Cek Login & Peran
 if (!isset($_SESSION['user_id']) || $_SESSION['peran'] != 'siswa') {
     header("Location: index.php");
     exit;
@@ -10,7 +9,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['peran'] != 'siswa') {
 
 $user_id = $_SESSION['user_id'];
 
-// 2. Ambil ID Siswa
 $sql_student = "SELECT id, nama_lengkap FROM siswa WHERE id_pengguna = '$user_id'";
 $res_student = $conn->query($sql_student);
 $student = $res_student->fetch_assoc();
@@ -21,7 +19,6 @@ if (!$student) {
 
 $id_siswa = $student['id'];
 
-// 3. Cek Kelengkapan Data Keluarga (Gatekeeper)
 $sql_check = "SELECT * FROM detail_keluarga_siswa WHERE id_siswa = '$id_siswa'";
 $check_res = $conn->query($sql_check);
 
@@ -30,7 +27,6 @@ if ($check_res->num_rows == 0) {
     exit;
 }
 
-// 4. Ambil Data Hasil Asesmen (Gaya Belajar)
 $sql_vak = "SELECT ringkasan_hasil, skor FROM hasil_asesmen WHERE id_siswa = '$id_siswa' AND kategori = 'gaya_belajar' ORDER BY id DESC LIMIT 1";
 $res_vak = $conn->query($sql_vak);
 $vak_data = $res_vak->fetch_assoc();
@@ -92,27 +88,24 @@ if ($vak_data) {
     <nav class="bg-white shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-50">
         <h1 class="font-bold text-blue-600 text-xl tracking-tight">Aplikasi BK</h1>
         <div class="flex gap-4 items-center">
-            <span class="text-slate-500 text-sm hidden md:inline">Halo, <?= htmlspecialchars($student['nama_lengkap']) ?></span>
+            <span class="text-slate-500 text-sm hidden md:inline"><?= htmlspecialchars($student['nama_lengkap']) ?></span>
             <a href="logout.php" class="text-red-500 text-sm font-medium hover:bg-red-50 px-3 py-1 rounded transition">Keluar</a>
         </div>
     </nav>
 
     <div class="container mx-auto p-6 flex-grow">
         
-        <!-- Hero Section -->
         <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-8 rounded-2xl shadow-lg mb-8 relative overflow-hidden">
             <div class="relative z-10">
                 <h2 class="text-3xl md:text-4xl font-bold mb-2">Selamat Datang, <?= explode(' ', $student['nama_lengkap'])[0] ?>! 👋</h2>
-                <p class="text-blue-100 text-lg max-w-2xl">Siap untuk mengenal dirimu lebih dalam hari ini? Cek hasil asesmenmu di bawah ini.</p>
+                <p class="text-blue-100 text-lg max-w-2xl">Siap untuk mengenal dirimu lebih dalam hari ini? Jadwalkan konsultasi atau cek hasil asesmenmu di bawah ini.</p>
             </div>
-            <!-- Decorative Circle -->
             <div class="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
             <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-blue-400 opacity-20 rounded-full blur-2xl"></div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <!-- Kolom Kiri: Menu & Jadwal -->
             <div class="lg:col-span-1 space-y-6">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
                     <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2 mb-4">
@@ -126,7 +119,6 @@ if ($vak_data) {
                 </div>
             </div>
 
-            <!-- Kolom Kanan: Hasil Asesmen (VAK) -->
             <div class="lg:col-span-2">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full">
                     <div class="flex items-center justify-between mb-6">
@@ -140,7 +132,6 @@ if ($vak_data) {
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                        <!-- Chart Area -->
                         <div class="relative h-64 w-full flex justify-center">
                             <?php if ($vak_data): ?>
                                 <canvas id="vakChart"></canvas>
@@ -151,7 +142,6 @@ if ($vak_data) {
                             <?php endif; ?>
                         </div>
 
-                        <!-- Description Area -->
                         <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
                             <h4 class="font-bold text-slate-700 mb-2">Apa artinya?</h4>
                             <p class="text-slate-600 text-sm leading-relaxed">
@@ -178,9 +168,9 @@ if ($vak_data) {
                 datasets: [{
                     data: [<?= $vak_counts['Visual'] ?>, <?= $vak_counts['Auditori'] ?>, <?= $vak_counts['Kinestetik'] ?>],
                     backgroundColor: [
-                        '#3b82f6', // Blue-500
-                        '#10b981', // Emerald-500
-                        '#f59e0b'  // Amber-500
+                        '#3b82f6',
+                        '#10b981',
+                        '#f59e0b'
                     ],
                     borderWidth: 0,
                     hoverOffset: 4
