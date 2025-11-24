@@ -77,7 +77,7 @@ $res_schedule = $conn->query($sql_schedule);
     <nav class="bg-white shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-50">
         <h1 class="font-bold text-blue-600 text-xl">Panel Konselor</h1>
         <div class="flex gap-4 items-center">
-            <span class="text-slate-500 text-sm">Halo, <?= $guru['nama_lengkap'] ?></span>
+            <span class="text-slate-500 text-sm"><?= $guru['nama_lengkap'] ?></span>
             <a href="logout.php" class="text-red-500 text-sm hover:underline">Keluar</a>
         </div>
     </nav>
