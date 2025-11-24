@@ -2,7 +2,6 @@
 session_start();
 include 'config/database.php';
 
-// Cek Sesi
 if (!isset($_SESSION['user_id'])) { header("Location: index.php"); exit; }
 
 $user_id = $_SESSION['user_id'];
@@ -10,14 +9,13 @@ $res = $conn->query("SELECT id FROM siswa WHERE id_pengguna = '$user_id'");
 $row = $res->fetch_assoc();
 $id_siswa = $row['id'];
 
-// --- AMBIL DATA EKSISTING ---
 
-// 1. Data Keluarga
+// Data Keluarga
 $sql_keluarga = "SELECT * FROM detail_keluarga_siswa WHERE id_siswa = '$id_siswa'";
 $res_keluarga = $conn->query($sql_keluarga);
 $data_keluarga = $res_keluarga->fetch_assoc();
 
-// 2. Data Asesmen (Looping untuk ambil semua kategori)
+// Data Asesmen (Looping untuk ambil semua kategori)
 $sql_asesmen = "SELECT kategori, ringkasan_hasil FROM hasil_asesmen WHERE id_siswa = '$id_siswa'";
 $res_asesmen = $conn->query($sql_asesmen);
 
@@ -40,10 +38,10 @@ function isChecked($array, $key, $value) {
     return $array[$key] == $value ? 'checked' : '';
 }
 
-// --- PROSES UPDATE ---
+// Proses Update
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
-    // 1. Update Data Keluarga
+    // Update Data Keluarga
     $nama_ayah      = $_POST['nama_ayah'];
     $pekerjaan_ayah = $_POST['pekerjaan_ayah'];
     $nama_ibu       = $_POST['nama_ibu'];
@@ -73,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $conn->query($sql_insert_keluarga);
     }
 
-    // 2. Update Kepribadian (Kondisi Keluarga)
+    // Update Kepribadian (Kondisi Keluarga)
     $answers_kepribadian = [
         'q1_status_ortu' => $_POST['q1_status_ortu'],
         'q2_status_ortu' => $_POST['q2_status_ortu'],
@@ -85,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $conn->query("DELETE FROM hasil_asesmen WHERE id_siswa='$id_siswa' AND kategori='kepribadian'");
     $conn->query("INSERT INTO hasil_asesmen (id_siswa, kategori, ringkasan_hasil, skor) VALUES ('$id_siswa', 'kepribadian', '$json_kepribadian', '-')");
 
-    // 3. Update Gaya Belajar (VAK)
+    // Update Gaya Belajar (VAK)
     $answers_gaya_belajar = [
         'q1_gaya_belajar' => $_POST['q1_gaya_belajar'],
         'q2_gaya_belajar' => $_POST['q2_gaya_belajar'],
@@ -104,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $conn->query("DELETE FROM hasil_asesmen WHERE id_siswa='$id_siswa' AND kategori='gaya_belajar'");
     $conn->query("INSERT INTO hasil_asesmen (id_siswa, kategori, ringkasan_hasil, skor) VALUES ('$id_siswa', 'gaya_belajar', '$json_gaya_belajar', '$hasil_skor_vak')");
 
-    // 4. Update Kesehatan Mental
+    // Update Kesehatan Mental
     $answers_mental = [
         'q1_nyaman_teman' => $_POST['q1'],
         'q2_cemas' => $_POST['q2'],
@@ -118,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $conn->query("DELETE FROM hasil_asesmen WHERE id_siswa='$id_siswa' AND kategori='kesehatan_mental'");
     $conn->query("INSERT INTO hasil_asesmen (id_siswa, kategori, ringkasan_hasil, skor) VALUES ('$id_siswa', 'kesehatan_mental', '$json_mental', '$skor_mental')");
 
-    // 5. Update Minat Karir
+    // Update Minat Karir
     $answers_karir = [
         'rencana_lulus' => $_POST['karir_q1'],
         'mapel_favorit' => isset($_POST['karir_q2']) ? $_POST['karir_q2'] : [],
@@ -130,7 +128,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $conn->query("DELETE FROM hasil_asesmen WHERE id_siswa='$id_siswa' AND kategori='minat_karir'");
     $conn->query("INSERT INTO hasil_asesmen (id_siswa, kategori, ringkasan_hasil, skor) VALUES ('$id_siswa', 'minat_karir', '$json_karir', '$skor_karir')");
 
-    // Redirect kembali ke dashboard dengan pesan sukses (opsional)
     header("Location: dashboard_siswa.php");
     exit;
 }
@@ -171,7 +168,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <form method="POST" class="p-8 space-y-10" onsubmit="return validateCheckbox()">
             
-            <!-- BAGIAN 1: DATA KELUARGA -->
             <section class="space-y-4">
                 <h3 class="text-lg font-bold text-indigo-700 border-b pb-2">1. Data Keluarga & Ekonomi</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -210,7 +206,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
             </section>
 
-            <!-- BAGIAN 2: KEPRIBADIAN (Kondisi Keluarga) -->
             <?php $kep = getVal($data_asesmen, 'kepribadian', []); ?>
             <section class="space-y-4">
                 <h3 class="text-lg font-bold text-indigo-700 border-b pb-2">2. Kondisi Keluarga (Sosial)</h3>
@@ -251,7 +246,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
             </section>
 
-            <!-- BAGIAN 3: GAYA BELAJAR -->
             <?php $gb = getVal($data_asesmen, 'gaya_belajar', []); ?>
             <section class="space-y-4">
                 <h3 class="text-lg font-bold text-indigo-700 border-b pb-2">3. Gaya Belajar (VAK)</h3>
@@ -291,7 +285,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
             </section>
 
-            <!-- BAGIAN 4: KESEHATAN MENTAL -->
             <?php $km = getVal($data_asesmen, 'kesehatan_mental', []); ?>
             <section class="space-y-4">
                 <h3 class="text-lg font-bold text-indigo-700 border-b pb-2">4. Kesehatan Mental</h3>
@@ -334,7 +327,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
             </section>
 
-            <!-- BAGIAN 5: MINAT KARIR -->
             <?php $mk = getVal($data_asesmen, 'minat_karir', []); ?>
             <section class="space-y-4">
                 <h3 class="text-lg font-bold text-indigo-700 border-b pb-2">5. Minat Karir</h3>

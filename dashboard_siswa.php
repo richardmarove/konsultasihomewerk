@@ -45,7 +45,6 @@ if ($vak_data) {
         }
     }
     
-    // Tentukan Dominan untuk Deskripsi
     $max_score = max($vak_counts);
     $dominant_styles = array_keys($vak_counts, $max_score);
     
@@ -68,6 +67,15 @@ if ($vak_data) {
         $dominant_desc = "Kamu memiliki gaya belajar kombinasi! Ini berarti kamu fleksibel dan bisa menggunakan beberapa cara belajar sekaligus untuk memahami materi dengan lebih baik.";
     }
 }
+
+$sql_schedule = "
+    SELECT k.*, c.nama_lengkap as nama_konselor 
+    FROM konsultasi k 
+    JOIN konselor c ON k.id_konselor = c.id 
+    WHERE k.id_siswa = '$id_siswa' AND k.status = 'disetujui' AND k.tanggal_konsultasi >= NOW() 
+    ORDER BY k.tanggal_konsultasi ASC
+";
+$res_schedule = $conn->query($sql_schedule);
 
 // Proses Konsultasi
 $msg_konsul = "";
@@ -134,7 +142,6 @@ $list_konselor = $conn->query("SELECT id, nama_lengkap FROM konselor");
                 </a>
             </div>
             <div class="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-blue-400 opacity-20 rounded-full blur-2xl"></div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -143,11 +150,33 @@ $list_konselor = $conn->query("SELECT id, nama_lengkap FROM konselor");
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
                     <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2 mb-4">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
-                        Jadwal Konsultasi
+                        Jadwal Mendatang
                     </h3>
-                    <p class="text-slate-500 text-sm mb-6">Ingin curhat atau butuh bimbingan? Buat janji temu sekarang.</p>
-                    <button onclick="document.getElementById('modalKonsul').showModal()" class="w-full bg-blue-50 text-blue-600 px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-100 transition">
-                        Buat Janji Tamu
+                    
+                    <?php if($res_schedule->num_rows > 0): ?>
+                        <div class="space-y-4 mb-6">
+                            <?php while($sch = $res_schedule->fetch_assoc()): ?>
+                                <div class="flex gap-3 items-start border-b border-slate-50 pb-3 last:border-0 last:pb-0">
+                                    <div class="bg-blue-50 text-blue-600 w-12 h-12 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                                        <span class="text-[10px] font-bold uppercase"><?= date('M', strtotime($sch['tanggal_konsultasi'])) ?></span>
+                                        <span class="text-lg font-bold leading-none"><?= date('d', strtotime($sch['tanggal_konsultasi'])) ?></span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-sm"><?= $sch['nama_konselor'] ?></h4>
+                                        <p class="text-xs text-slate-500 mb-1"><?= date('H:i', strtotime($sch['tanggal_konsultasi'])) ?> WIB • <?= $sch['kategori_topik'] ?></p>
+                                        <span class="inline-block text-[10px] px-1.5 py-0.5 rounded bg-green-100 text-green-700 font-medium">
+                                            <?= ucfirst($sch['metode_konsultasi']) ?>
+                                        </span>
+                                    </div>
+                                </div>
+                            <?php endwhile; ?>
+                        </div>
+                    <?php else: ?>
+                        <p class="text-slate-500 text-sm mb-6">Belum ada jadwal konsultasi yang disetujui.</p>
+                    <?php endif; ?>
+
+                    <button onclick="document.getElementById('modalKonsul').showModal()" class="w-full bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-sm">
+                        Buat Janji Baru
                     </button>
                 </div>
             </div>
