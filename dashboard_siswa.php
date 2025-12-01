@@ -118,7 +118,13 @@ $list_konselor = $conn->query("SELECT id, nama_lengkap FROM konselor");
 <body class="bg-slate-50 lexend-font min-h-screen flex flex-col">
 
     <nav class="bg-white shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-50">
-        <h1 class="font-bold text-blue-600 text-xl tracking-tight">Aplikasi BK</h1>
+        <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-black">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+            <h1 class="font-bold text-black text-xl tracking-tight">Aplikasi BK</h1>
+        </div>
         <div class="flex gap-4 items-center">
             <span class="text-slate-500 text-sm hidden md:inline"><?= htmlspecialchars($student['nama_lengkap']) ?></span>
             <a href="logout.php" class="text-red-500 text-sm font-medium hover:bg-red-50 px-3 py-1 rounded transition">Keluar</a>
@@ -129,11 +135,11 @@ $list_konselor = $conn->query("SELECT id, nama_lengkap FROM konselor");
         
         <?= $msg_konsul ?>
 
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-8 rounded-2xl shadow-lg mb-8 relative overflow-hidden">
+        <div class="bg-black text-white p-8 rounded-2xl shadow-lg mb-8 relative overflow-hidden">
             <div class="relative z-10">
                 <h2 class="text-3xl md:text-4xl font-bold mb-2">Selamat Datang, <?= explode(' ', $student['nama_lengkap'])[0] ?>! 👋</h2>
-                <p class="text-blue-100 text-lg max-w-2xl mb-6">Siap untuk mengenal dirimu lebih dalam hari ini? Jadwalkan konsultasi atau cek hasil asesmenmu di bawah ini.</p>
-                <a href="edit_asesmen.php" class="inline-flex items-center gap-2 bg-white text-blue-600 px-5 py-2.5 rounded-lg font-bold hover:bg-blue-50 transition shadow-sm">
+                <p class="text-zinc-400 text-lg max-w-2xl mb-6">Siap untuk mengenal dirimu lebih dalam hari ini? Jadwalkan konsultasi atau cek hasil asesmenmu di bawah ini.</p>
+                <a href="edit_asesmen.php" class="inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-lg font-bold hover:bg-zinc-200 transition shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
                         <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
                         <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
@@ -141,7 +147,7 @@ $list_konselor = $conn->query("SELECT id, nama_lengkap FROM konselor");
                     Edit Data Asesmen
                 </a>
             </div>
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-zinc-800 opacity-20 rounded-full blur-3xl"></div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -149,7 +155,7 @@ $list_konselor = $conn->query("SELECT id, nama_lengkap FROM konselor");
             <div class="lg:col-span-1 space-y-6">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
                     <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2 mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-black"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
                         Jadwal Mendatang
                     </h3>
                     
@@ -157,7 +163,7 @@ $list_konselor = $conn->query("SELECT id, nama_lengkap FROM konselor");
                         <div class="space-y-4 mb-6">
                             <?php while($sch = $res_schedule->fetch_assoc()): ?>
                                 <div class="flex gap-3 items-start border-b border-slate-50 pb-3 last:border-0 last:pb-0">
-                                    <div class="bg-blue-50 text-blue-600 w-12 h-12 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                                    <div class="bg-black text-white w-12 h-12 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
                                         <span class="text-[10px] font-bold uppercase"><?= date('M', strtotime($sch['tanggal_konsultasi'])) ?></span>
                                         <span class="text-lg font-bold leading-none"><?= date('d', strtotime($sch['tanggal_konsultasi'])) ?></span>
                                     </div>
@@ -175,7 +181,7 @@ $list_konselor = $conn->query("SELECT id, nama_lengkap FROM konselor");
                         <p class="text-slate-500 text-sm mb-6">Belum ada jadwal konsultasi yang disetujui.</p>
                     <?php endif; ?>
 
-                    <button onclick="document.getElementById('modalKonsul').showModal()" class="w-full bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-sm">
+                    <button onclick="document.getElementById('modalKonsul').showModal()" class="w-full bg-white text-black border border-black hover:text-white px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-zinc-800 transition shadow-sm">
                         Buat Janji Baru
                     </button>
                 </div>
@@ -185,10 +191,10 @@ $list_konselor = $conn->query("SELECT id, nama_lengkap FROM konselor");
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="font-bold text-xl text-slate-800 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-500"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-black"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                             Profil Gaya Belajar
                         </h3>
-                        <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full">
+                        <span class="bg-zinc-100 text-black text-xs font-bold px-3 py-1 rounded-full">
                             <?= $dominant_title ?>
                         </span>
                     </div>
@@ -274,7 +280,7 @@ $list_konselor = $conn->query("SELECT id, nama_lengkap FROM konselor");
                 </div>
 
                 <div class="pt-2">
-                    <button type="submit" name="submit_konsul" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition">
+                    <button type="submit" name="submit_konsul" class="w-full bg-black hover:bg-zinc-800 text-white font-bold py-2.5 rounded-lg transition">
                         Kirim Permintaan
                     </button>
                 </div>
@@ -292,9 +298,9 @@ $list_konselor = $conn->query("SELECT id, nama_lengkap FROM konselor");
                 datasets: [{
                     data: [<?= $vak_counts['Visual'] ?>, <?= $vak_counts['Auditori'] ?>, <?= $vak_counts['Kinestetik'] ?>],
                     backgroundColor: [
-                        '#3b82f6',
-                        '#10b981',
-                        '#f59e0b'
+                        '#18181b', // zinc-900
+                        '#71717a', // zinc-500
+                        '#d4d4d8'  // zinc-300
                     ],
                     borderWidth: 0,
                     hoverOffset: 4
