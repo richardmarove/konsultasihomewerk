@@ -298,9 +298,9 @@ $list_konselor = $conn->query("SELECT id, nama_lengkap FROM konselor");
                 datasets: [{
                     data: [<?= $vak_counts['Visual'] ?>, <?= $vak_counts['Auditori'] ?>, <?= $vak_counts['Kinestetik'] ?>],
                     backgroundColor: [
-                        '#6161f1ff',
-                        '#f03c3cff', 
-                        '#e1ff69ff'  
+                        '#14e545ff',
+                        '#e1ff69ff', 
+                        '#f03c3cff'  
                     ],
                     borderWidth: 0,
                     hoverOffset: 4
