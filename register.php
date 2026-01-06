@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <h2 class="text-3xl font-bold mb-4">Pendaftaran</h2>
             <p class="opacity-90 mb-6">Membutuhkan akun untuk menggunakan aplikasi ini.</p>
             <div class="text-6xl">🚀</div>
-            <a href="index.php" class="mt-8 text-sm underline text-blue-200 hover:text-white">Kembali ke Login</a>
+            <a href="login.php" class="mt-8 text-sm underline text-blue-200 hover:text-white">Kembali ke Login</a>
         </div>
 
         <div class="md:w-2/3 p-8">
@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             <?php if($success): ?>
                 <div class="bg-green-100 text-green-600 p-3 rounded mb-4 text-sm">
-                    <?= $success ?> <a href="index.php" class="font-bold underline">Login disini</a>.
+                    <?= $success ?> <a href="login.php" class="font-bold underline">Login disini</a>.
                 </div>
             <?php endif; ?>
 

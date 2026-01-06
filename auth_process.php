@@ -21,7 +21,7 @@ if ($result->num_rows > 0) {
 
         // Redirect berdasarkan peran
         if ($row['peran'] == 'siswa') {
-            header("Location: dashboard_siswa.php");
+            header("Location: index.php");
         } else if ($row['peran'] == 'konselor') {
             header("Location: dashboard_guru.php");
         } else if ($row['peran'] == 'admin') {
@@ -33,11 +33,11 @@ if ($result->num_rows > 0) {
 
     } else {
 
-        header("Location: index.php?error=1");
+        header("Location: login.php?error=1");
         exit;
     }
 } else {
-    header("Location: index.php?error=1");
+    header("Location: login.php?error=1");
     exit;
 }
 ?>

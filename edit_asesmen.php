@@ -163,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <h2 class="text-xl font-bold">Edit Data Asesmen</h2>
                 <p class="text-indigo-100 text-sm">Perbarui informasi Anda jika ada perubahan.</p>
             </div>
-            <a href="dashboard_siswa.php" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded transition text-sm">Kembali</a>
+            <a href="index.php" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded transition text-sm">Kembali</a>
         </div>
 
         <form method="POST" class="p-8 space-y-10" onsubmit="return validateCheckbox()">
