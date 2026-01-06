@@ -137,22 +137,22 @@ if ($is_logged_in && $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submi
         }
     </style>
 </head>
-<body class="bg-slate-50 lexend-font min-h-screen flex flex-col">
+<body class="bg-[#FDFDFD] lexend-font min-h-screen flex flex-col">
 
     <nav class="bg-white shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-50">
         <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-black">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#6C5CE7]">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                 <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
             </svg>
-            <h1 class="font-bold text-black text-xl tracking-tight">Aplikasi BK</h1>
+            <h1 class="font-bold text-[#6C5CE7] text-xl tracking-tight">Aplikasi BK</h1>
         </div>
         <div class="flex gap-4 items-center">
             <?php if ($is_logged_in): ?>
                 <span class="text-slate-500 text-sm hidden md:inline"><?= htmlspecialchars($student['nama_lengkap']) ?></span>
                 <a href="logout.php" class="text-red-500 text-sm font-medium hover:bg-red-50 px-3 py-1 rounded transition">Keluar</a>
             <?php else: ?>
-                <a href="login.php" class="bg-black text-white text-sm font-medium hover:bg-zinc-800 px-4 py-2 rounded-lg transition">Masuk</a>
+                <a href="login.php" class="bg-[#6C5CE7] text-white text-sm font-medium hover:bg-[#5B4ED1] px-4 py-2 rounded-lg transition">Masuk</a>
             <?php endif; ?>
         </div>
     </nav>
@@ -162,11 +162,11 @@ if ($is_logged_in && $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submi
         <?= $msg_konsul ?>
 
         <?php if ($is_logged_in): ?>
-        <div class="bg-black text-white p-8 rounded-2xl shadow-lg mb-8 relative overflow-hidden">
+        <div class="bg-[#6C5CE7] text-white p-8 rounded-2xl shadow-lg mb-8 relative overflow-hidden">
             <div class="relative z-10">
                 <h2 class="text-3xl md:text-4xl font-bold mb-2">Selamat Datang, <?= explode(' ', $student['nama_lengkap'])[0] ?>! 👋</h2>
-                <p class="text-zinc-400 text-lg max-w-2xl mb-6">Siap untuk mengenal dirimu lebih dalam hari ini? Jadwalkan konsultasi atau cek hasil asesmenmu di bawah ini.</p>
-                <a href="edit_asesmen.php" class="inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-lg font-bold hover:bg-zinc-200 transition shadow-sm">
+                <p class="text-purple-100 text-lg max-w-2xl mb-6">Siap untuk mengenal dirimu lebih dalam hari ini? Jadwalkan konsultasi atau cek hasil asesmenmu di bawah ini.</p>
+                <a href="edit_asesmen.php" class="inline-flex items-center gap-2 bg-white text-[#6C5CE7] px-5 py-2.5 rounded-lg font-bold hover:bg-[#F9F7FF] transition shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
                         <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
                         <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
@@ -174,14 +174,14 @@ if ($is_logged_in && $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submi
                     Edit Data Asesmen
                 </a>
             </div>
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-zinc-800 opacity-20 rounded-full blur-3xl"></div>
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white opacity-20 rounded-full blur-3xl"></div>
         </div>
         <?php else: ?>
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-8 rounded-2xl shadow-lg mb-8 relative overflow-hidden">
+        <div class="bg-gradient-to-r from-[#6C5CE7] to-[#8B7CF7] text-white p-8 rounded-2xl shadow-lg mb-8 relative overflow-hidden">
             <div class="relative z-10">
                 <h2 class="text-3xl md:text-4xl font-bold mb-2">Selamat Datang di Aplikasi BK 👋</h2>
-                <p class="text-blue-100 text-lg max-w-2xl mb-6">Kenali potensimu, jadwalkan konsultasi dengan guru BK, dan temukan solusi terbaik untuk masalahmu. Masuk untuk mengakses semua fitur.</p>
-                <a href="login.php" class="inline-flex items-center gap-2 bg-white text-blue-700 px-5 py-2.5 rounded-lg font-bold hover:bg-blue-50 transition shadow-sm">
+                <p class="text-purple-100 text-lg max-w-2xl mb-6">Kenali potensimu, jadwalkan konsultasi dengan guru BK, dan temukan solusi terbaik untuk masalahmu. Masuk untuk mengakses semua fitur.</p>
+                <a href="login.php" class="inline-flex items-center gap-2 bg-white text-[#6C5CE7] px-5 py-2.5 rounded-lg font-bold hover:bg-[#F9F7FF] transition shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0v-2z"/>
                         <path fill-rule="evenodd" d="M11.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H1.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
@@ -230,7 +230,7 @@ if ($is_logged_in && $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submi
 
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
                     <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2 mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-black"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#6C5CE7]"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
                         Jadwal Mendatang
                     </h3>
                     
@@ -238,7 +238,7 @@ if ($is_logged_in && $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submi
                         <div class="space-y-4 mb-6">
                             <?php while($sch = $res_schedule->fetch_assoc()): ?>
                                 <div class="flex gap-3 items-start border-b border-slate-50 pb-3 last:border-0 last:pb-0">
-                                    <div class="bg-black text-white w-12 h-12 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                                    <div class="bg-[#6C5CE7] text-white w-12 h-12 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
                                         <span class="text-[10px] font-bold uppercase"><?= date('M', strtotime($sch['tanggal_konsultasi'])) ?></span>
                                         <span class="text-lg font-bold leading-none"><?= date('d', strtotime($sch['tanggal_konsultasi'])) ?></span>
                                     </div>
@@ -256,7 +256,7 @@ if ($is_logged_in && $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submi
                         <p class="text-slate-500 text-sm mb-6">Belum ada jadwal konsultasi yang disetujui.</p>
                     <?php endif; ?>
 
-                    <button onclick="document.getElementById('modalKonsul').showModal()" class="w-full bg-white text-black border border-black hover:text-white px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-zinc-800 transition shadow-sm">
+                    <button onclick="document.getElementById('modalKonsul').showModal()" class="w-full bg-white text-[#6C5CE7] border border-[#6C5CE7] hover:text-white px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-[#6C5CE7] transition shadow-sm">
                         Buat Janji Baru
                     </button>
                 </div>
@@ -264,18 +264,18 @@ if ($is_logged_in && $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submi
                 <!-- Locked state for guests -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
                     <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2 mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-black"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#6C5CE7]"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
                         Jadwal Konsultasi
                     </h3>
                     <div class="text-center py-6">
-                        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400">
+                        <div class="w-16 h-16 bg-[#F9F7FF] rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#6C5CE7]/50">
                                 <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
                                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                             </svg>
                         </div>
                         <p class="text-slate-500 text-sm mb-4">Masuk untuk melihat jadwal konsultasi dan membuat janji baru.</p>
-                        <a href="login.php" class="inline-block bg-black text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-zinc-800 transition">
+                        <a href="login.php" class="inline-block bg-[#6C5CE7] text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#5B4ED1] transition">
                             Masuk Sekarang
                         </a>
                     </div>
@@ -287,11 +287,11 @@ if ($is_logged_in && $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submi
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="font-bold text-xl text-slate-800 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-black"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#6C5CE7]"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                             Profil Gaya Belajar
                         </h3>
                         <?php if ($is_logged_in): ?>
-                        <span class="bg-zinc-100 text-black text-xs font-bold px-3 py-1 rounded-full">
+                        <span class="bg-[#F9F7FF] text-[#6C5CE7] text-xs font-bold px-3 py-1 rounded-full">
                             <?= $dominant_title ?>
                         </span>
                         <?php endif; ?>
@@ -309,7 +309,7 @@ if ($is_logged_in && $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submi
                             <?php endif; ?>
                         </div>
 
-                        <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                        <div class="bg-[#F9F7FF] p-6 rounded-xl border border-[#F9F7FF]">
                             <h4 class="font-bold text-slate-700 mb-2">Apa artinya?</h4>
                             <p class="text-slate-600 text-sm leading-relaxed">
                                 <?= $dominant_desc ?>
@@ -322,15 +322,15 @@ if ($is_logged_in && $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submi
                     <?php else: ?>
                     <!-- Locked state for guests -->
                     <div class="text-center py-12">
-                        <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400">
+                        <div class="w-20 h-20 bg-[#F9F7FF] rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#6C5CE7]/50">
                                 <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
                                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                             </svg>
                         </div>
                         <h4 class="font-bold text-slate-700 mb-2">Temukan Gaya Belajarmu</h4>
                         <p class="text-slate-500 text-sm max-w-md mx-auto mb-6">Masuk untuk melihat profil gaya belajarmu berdasarkan tes VAK. Ketahui apakah kamu tipe Visual, Auditori, atau Kinestetik!</p>
-                        <a href="login.php" class="inline-block bg-black text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-zinc-800 transition">
+                        <a href="login.php" class="inline-block bg-[#6C5CE7] text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-[#5B4ED1] transition">
                             Masuk Sekarang
                         </a>
                     </div>
@@ -398,7 +398,7 @@ if ($is_logged_in && $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submi
                 </div>
 
                 <div class="pt-2">
-                    <button type="submit" name="submit_konsul" class="w-full bg-black hover:bg-zinc-800 text-white font-bold py-2.5 rounded-lg transition">
+                    <button type="submit" name="submit_konsul" class="w-full bg-[#6C5CE7] hover:bg-[#5B4ED1] text-white font-bold py-2.5 rounded-lg transition">
                         Kirim Permintaan
                     </button>
                 </div>
@@ -416,7 +416,7 @@ if ($is_logged_in && $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submi
                 datasets: [{
                     data: [<?= $vak_counts['Visual'] ?>, <?= $vak_counts['Auditori'] ?>, <?= $vak_counts['Kinestetik'] ?>],
                     backgroundColor: [
-                        '#14e545ff',
+                        '#873de9ff',
                         '#e1ff69ff', 
                         '#f03c3cff'  
                     ],
