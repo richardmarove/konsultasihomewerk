@@ -1,450 +1,208 @@
 <?php
 session_start();
-include 'config/database.php';
-
-// Check if user is logged in as student
-$is_logged_in = isset($_SESSION['user_id']) && $_SESSION['peran'] == 'siswa';
-
-// Initialize variables for locked state
-$student = ['nama_lengkap' => 'Siswa'];
-$id_siswa = null;
-$vak_data = null;
-$vak_counts = ['Visual' => 0, 'Auditori' => 0, 'Kinestetik' => 0];
-$dominant_desc = "Login untuk melihat hasil asesmenmu.";
-$dominant_title = "-";
-$res_schedule = null;
-$res_pending = null;
-$list_konselor = null;
-
-// Only fetch student data if logged in
-if ($is_logged_in) {
-    $user_id = $_SESSION['user_id'];
-
-    $sql_student = "SELECT id, nama_lengkap FROM siswa WHERE id_pengguna = '$user_id'";
-    $res_student = $conn->query($sql_student);
-    $student = $res_student->fetch_assoc();
-
-    if (!$student) {
-        die("Data siswa tidak ditemukan. Pastikan akun user sudah terhubung ke tabel siswa.");
-    }
-
-    $id_siswa = $student['id'];
-
-    $sql_check = "SELECT * FROM detail_keluarga_siswa WHERE id_siswa = '$id_siswa'";
-    $check_res = $conn->query($sql_check);
-
-    if ($check_res->num_rows == 0) {
-        header("Location: modul_asesmen.php");
-        exit;
-    }
-
-    $sql_vak = "SELECT ringkasan_hasil, skor FROM hasil_asesmen WHERE id_siswa = '$id_siswa' AND kategori = 'gaya_belajar' ORDER BY id DESC LIMIT 1";
-    $res_vak = $conn->query($sql_vak);
-    $vak_data = $res_vak->fetch_assoc();
-
-    $vak_counts = ['Visual' => 0, 'Auditori' => 0, 'Kinestetik' => 0];
-    $dominant_desc = "Belum ada data";
-    $dominant_title = "-";
-
-    if ($vak_data) {
-        $answers = json_decode($vak_data['ringkasan_hasil'], true);
-        if ($answers) {
-            foreach ($answers as $ans) {
-                if (isset($vak_counts[$ans])) {
-                    $vak_counts[$ans]++;
+// Redirect logged-in students to dashboard
+if (isset($_SESSION['user_id']) && $_SESSION['peran'] == 'siswa') {
+    header("Location: dashboard_siswa.php");
+    exit;
+}
+// Redirect others if needed
+if (isset($_SESSION['user_id'])) {
+     if ($_SESSION['peran'] == 'konselor') header("Location: dashboard_guru.php");
+     if ($_SESSION['peran'] == 'admin') header("Location: dashboard_admin.php");
+}
+?>
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Konseling Sekolah - Skaju</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Lexend', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#6C5CE7',
+                        secondary: '#a55eea',
+                        accent: '#F9F7FF',
+                    }
                 }
             }
         }
-        
-        $max_score = max($vak_counts);
-        $dominant_styles = array_keys($vak_counts, $max_score);
-        
-        if (count($dominant_styles) == 1) {
-            $dominant_title = $dominant_styles[0];
-        } else {
-            $dominant_title = "Kombinasi (" . implode(" & ", $dominant_styles) . ")";
-        }
-
-        // Deskripsi Hardcoded
-        $descriptions = [
-            'Visual' => "Kamu adalah tipe Visual! Kamu lebih mudah memahami sesuatu dengan melihat gambar, grafik, atau membaca buku. Warna dan tata letak yang rapi sangat membantumu belajar.",
-            'Auditori' => "Kamu adalah tipe Auditori! Kamu lebih suka mendengarkan penjelasan guru, berdiskusi, atau belajar sambil mendengarkan musik. Suara dan intonasi sangat penting bagimu.",
-            'Kinestetik' => "Kamu adalah tipe Kinestetik! Kamu belajar paling baik dengan melakukan langsung, praktik, atau bergerak. Kamu mungkin sulit duduk diam terlalu lama saat belajar."
-        ];
-
-        if (count($dominant_styles) == 1) {
-            $dominant_desc = $descriptions[$dominant_styles[0]];
-        } else {
-            $dominant_desc = "Kamu memiliki gaya belajar kombinasi! Ini berarti kamu fleksibel dan bisa menggunakan beberapa cara belajar sekaligus untuk memahami materi dengan lebih baik.";
-        }
-    }
-
-    $sql_schedule = "
-        SELECT k.*, c.nama_lengkap as nama_konselor 
-        FROM konsultasi k 
-        JOIN konselor c ON k.id_konselor = c.id 
-        WHERE k.id_siswa = '$id_siswa' AND k.status = 'disetujui' AND k.tanggal_konsultasi >= NOW() 
-        ORDER BY k.tanggal_konsultasi ASC
-    ";
-    $res_schedule = $conn->query($sql_schedule);
-
-    // Pending requests
-    $sql_pending = "
-        SELECT k.*, c.nama_lengkap as nama_konselor 
-        FROM konsultasi k 
-        JOIN konselor c ON k.id_konselor = c.id 
-        WHERE k.id_siswa = '$id_siswa' AND k.status = 'menunggu' 
-        ORDER BY k.created_at DESC
-    ";
-    $res_pending = $conn->query($sql_pending);
-
-    $list_konselor = $conn->query("SELECT id, nama_lengkap FROM konselor");
-}
-
-// Proses Konsultasi (only if logged in and POST)
-$msg_konsul = "";
-if ($is_logged_in && $_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_konsul'])) {
-    $id_konselor = $_POST['id_konselor'];
-    $topik = $_POST['topik'];
-    $keluhan = $_POST['keluhan'];
-    $tanggal = $_POST['tanggal'];
-    $jam = $_POST['jam'];
-
-    
-    $tgl_waktu = $tanggal . ' ' . $jam . ':00';
-
-    $stmt = $conn->prepare("INSERT INTO konsultasi (id_siswa, id_konselor, kategori_topik, deskripsi_keluhan, tanggal_konsultasi, status) VALUES (?, ?, ?, ?, ?, 'menunggu')");
-    $stmt->bind_param("iisss", $id_siswa, $id_konselor, $topik, $keluhan, $tgl_waktu);
-    
-    if ($stmt->execute()) {
-        $msg_konsul = "<div class='bg-green-100 text-green-700 p-4 rounded mb-6'>Permintaan konsultasi berhasil dikirim! Tunggu konfirmasi dari guru ya.</div>";
-    } else {
-        $msg_konsul = "<div class='bg-red-100 text-red-700 p-4 rounded mb-6'>Gagal mengirim permintaan: " . $conn->error . "</div>";
-    }
-}
-?>
-
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <title>Dashboard Siswa</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </script>
     <style>
-        .lexend-font {
-            font-family: "Lexend", sans-serif;
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .hero-blob {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: linear-gradient(180deg, rgba(108, 92, 231, 0.2) 0%, rgba(165, 94, 234, 0.1) 100%);
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            animation: float 10s infinite ease-in-out;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.05); }
         }
     </style>
 </head>
-<body class="bg-[#FDFDFD] lexend-font min-h-screen flex flex-col">
+<body class="font-sans text-slate-800 antialiased overflow-x-hidden">
 
-    <nav class="bg-white shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#6C5CE7]">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-            </svg>
-            <h1 class="font-bold text-[#6C5CE7] text-xl tracking-tight">Aplikasi BK</h1>
-        </div>
-        <div class="flex gap-4 items-center">
-            <?php if ($is_logged_in): ?>
-                <span class="text-slate-500 text-sm hidden md:inline"><?= htmlspecialchars($student['nama_lengkap']) ?></span>
-                <a href="logout.php" class="text-red-500 text-sm font-medium hover:bg-red-50 px-3 py-1 rounded transition">Keluar</a>
-            <?php else: ?>
-                <a href="login.php" class="bg-[#6C5CE7] text-white text-sm font-medium hover:bg-[#5B4ED1] px-4 py-2 rounded-lg transition">Masuk</a>
-            <?php endif; ?>
+    <!-- Navbar -->
+    <nav class="glass-nav fixed w-full z-50 top-0 transition-all duration-300">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-primary/10 p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                </div>
+                <span class="font-bold text-xl tracking-tight text-slate-900">BK<span class="text-yellow-500">Skaju</span></span>
+            </div>
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+                <a href="#fitur" class="hover:text-primary transition">Fitur</a>
+                <a href="#tentang" class="hover:text-primary transition">Tentang</a>
+                <a href="#kontak" class="hover:text-primary transition">Kontak</a>
+            </div>
+            <div class="flex gap-4">
+                <a href="login.php" class="px-5 py-2.5 text-sm font-bold text-slate-700 hover:text-primary transition">Masuk</a>
+                <a href="register.php" class="px-5 py-2.5 text-sm font-bold bg-primary text-white rounded-xl hover:bg-secondary transition shadow-lg shadow-primary/30 transform hover:-translate-y-0.5">Daftar</a>
+            </div>
         </div>
     </nav>
 
-    <div class="container mx-auto p-6 flex-grow">
-        
-        <?= $msg_konsul ?>
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        <div class="hero-blob -top-20 -left-20"></div>
+        <div class="hero-blob bottom-0 right-0 bg-blue-100/50"></div>
 
-        <?php if ($is_logged_in): ?>
-        <div class="bg-[#6C5CE7] text-white p-8 rounded-2xl shadow-lg mb-8 relative overflow-hidden">
-            <div class="relative z-10">
-                <h2 class="text-3xl md:text-4xl font-bold mb-2">Selamat Datang, <?= explode(' ', $student['nama_lengkap'])[0] ?>! 👋</h2>
-                <p class="text-purple-100 text-lg max-w-2xl mb-6">Siap untuk mengenal dirimu lebih dalam hari ini? Jadwalkan konsultasi atau cek hasil asesmenmu di bawah ini.</p>
-                <a href="edit_asesmen.php" class="inline-flex items-center gap-2 bg-white text-[#6C5CE7] px-5 py-2.5 rounded-lg font-bold hover:bg-[#F9F7FF] transition shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-                    </svg>
-                    Edit Data Asesmen
+        <div class="container mx-auto px-6 text-center relative z-10">
+            <span class="inline-block py-1 px-3 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-6 animate-fade-in-up">Platform Konseling Modern</span>
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-tight mb-8">
+                Cerita Kamu, <br/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-yellow-300">Prioritas Kami.</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
+                Ruang aman untuk bercerita, menemukan potensi diri, dan mendapatkan bimbingan profesional dari guru BK sekolahmu.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <a href="login.php" class="px-8 py-4 bg-primary text-white rounded-2xl font-bold text-lg hover:bg-secondary transition shadow-xl shadow-primary/30 w-full sm:w-auto">
+                    Mulai Konsultasi
+                </a>
+                <a href="#fitur" class="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-2xl font-bold text-lg hover:bg-slate-50 transition w-full sm:w-auto">
+                    Pelajari Lebih Lanjut
                 </a>
             </div>
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white opacity-20 rounded-full blur-3xl"></div>
-        </div>
-        <?php else: ?>
-        <div class="bg-gradient-to-r from-[#6C5CE7] to-[#8B7CF7] text-white p-8 rounded-2xl shadow-lg mb-8 relative overflow-hidden">
-            <div class="relative z-10">
-                <h2 class="text-3xl md:text-4xl font-bold mb-2">Selamat Datang di Aplikasi BK 👋</h2>
-                <p class="text-purple-100 text-lg max-w-2xl mb-6">Kenali potensimu, jadwalkan konsultasi dengan guru BK, dan temukan solusi terbaik untuk masalahmu. Masuk untuk mengakses semua fitur.</p>
-                <a href="login.php" class="inline-flex items-center gap-2 bg-white text-[#6C5CE7] px-5 py-2.5 rounded-lg font-bold hover:bg-[#F9F7FF] transition shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0v-2z"/>
-                        <path fill-rule="evenodd" d="M11.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H1.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
-                    </svg>
-                    Masuk Sekarang
-                </a>
-            </div>
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
-        </div>
-        <?php endif; ?>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <div class="lg:col-span-1 space-y-6">
-                
-                <?php if ($is_logged_in): ?>
-                <!-- Permintaan Menunggu -->
-                <?php if($res_pending && $res_pending->num_rows > 0): ?>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-yellow-100 hover:shadow-md transition relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-16 h-16 bg-yellow-50 rounded-bl-full -mr-8 -mt-8 z-0"></div>
-                    <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2 mb-4 relative z-10">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-600"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        Menunggu Konfirmasi
-                    </h3>
-                    
-                    <div class="space-y-4">
-                        <?php while($pend = $res_pending->fetch_assoc()): ?>
-                            <div class="flex gap-3 items-start border-b border-slate-50 pb-3 last:border-0 last:pb-0 relative z-10">
-                                <div class="bg-yellow-50 text-yellow-600 w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-slate-800 text-sm"><?= $pend['nama_konselor'] ?></h4>
-                                    <p class="text-xs text-slate-500 mb-1">
-                                        <?= date('d M Y', strtotime($pend['tanggal_konsultasi'])) ?>, <?= date('H:i', strtotime($pend['tanggal_konsultasi'])) ?> WIB
-                                    </p>
-                                    <span class="inline-block text-[10px] px-1.5 py-0.5 rounded bg-yellow-100 text-yellow-700 font-medium">
-                                        Menunggu
-                                    </span>
-                                </div>
-                            </div>
-                        <?php endwhile; ?>
-                    </div>
-                </div>
-                <?php endif; ?>
-
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
-                    <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2 mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#6C5CE7]"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
-                        Jadwal Mendatang
-                    </h3>
-                    
-                    <?php if($res_schedule && $res_schedule->num_rows > 0): ?>
-                        <div class="space-y-4 mb-6">
-                            <?php while($sch = $res_schedule->fetch_assoc()): ?>
-                                <div class="flex gap-3 items-start border-b border-slate-50 pb-3 last:border-0 last:pb-0">
-                                    <div class="bg-[#6C5CE7] text-white w-12 h-12 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-                                        <span class="text-[10px] font-bold uppercase"><?= date('M', strtotime($sch['tanggal_konsultasi'])) ?></span>
-                                        <span class="text-lg font-bold leading-none"><?= date('d', strtotime($sch['tanggal_konsultasi'])) ?></span>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-slate-800 text-sm"><?= $sch['nama_konselor'] ?></h4>
-                                        <p class="text-xs text-slate-500 mb-1"><?= date('H:i', strtotime($sch['tanggal_konsultasi'])) ?> WIB • <?= $sch['kategori_topik'] ?></p>
-                                    </div>
-                                </div>
-                            <?php endwhile; ?>
-                        </div>
-                    <?php else: ?>
-                        <p class="text-slate-500 text-sm mb-6">Belum ada jadwal konsultasi yang disetujui.</p>
-                    <?php endif; ?>
-
-                    <button onclick="document.getElementById('modalKonsul').showModal()" class="w-full bg-white text-[#6C5CE7] border border-[#6C5CE7] hover:text-white px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-[#6C5CE7] transition shadow-sm">
-                        Buat Janji Baru
-                    </button>
-                </div>
-                <?php else: ?>
-                <!-- Locked state for guests -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
-                    <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2 mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#6C5CE7]"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
-                        Jadwal Konsultasi
-                    </h3>
-                    <div class="text-center py-6">
-                        <div class="w-16 h-16 bg-[#F9F7FF] rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#6C5CE7]/50">
-                                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                            </svg>
-                        </div>
-                        <p class="text-slate-500 text-sm mb-4">Masuk untuk melihat jadwal konsultasi dan membuat janji baru.</p>
-                        <a href="login.php" class="inline-block bg-[#6C5CE7] text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#5B4ED1] transition">
-                            Masuk Sekarang
-                        </a>
-                    </div>
-                </div>
-                <?php endif; ?>
-            </div>
-
-            <div class="lg:col-span-2">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="font-bold text-xl text-slate-800 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#6C5CE7]"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                            Profil Gaya Belajar
-                        </h3>
-                        <?php if ($is_logged_in): ?>
-                        <span class="bg-[#F9F7FF] text-[#6C5CE7] text-xs font-bold px-3 py-1 rounded-full">
-                            <?= $dominant_title ?>
-                        </span>
-                        <?php endif; ?>
-                    </div>
-
-                    <?php if ($is_logged_in): ?>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                        <div class="relative h-64 w-full flex justify-center">
-                            <?php if ($vak_data): ?>
-                                <canvas id="vakChart"></canvas>
-                            <?php else: ?>
-                                <div class="flex items-center justify-center h-full text-slate-400 text-sm">
-                                    Belum ada data asesmen.
-                                </div>
-                            <?php endif; ?>
-                        </div>
-
-                        <div class="bg-[#F9F7FF] p-6 rounded-xl border border-[#F9F7FF]">
-                            <h4 class="font-bold text-slate-700 mb-2">Apa artinya?</h4>
-                            <p class="text-slate-600 text-sm leading-relaxed">
-                                <?= $dominant_desc ?>
-                            </p>
-                            <div class="mt-4 pt-4 border-t border-slate-200">
-                                <p class="text-xs text-slate-400">Hasil ini berdasarkan tes VAK yang telah kamu isi.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <?php else: ?>
-                    <!-- Locked state for guests -->
-                    <div class="text-center py-12">
-                        <div class="w-20 h-20 bg-[#F9F7FF] rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#6C5CE7]/50">
-                                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                            </svg>
-                        </div>
-                        <h4 class="font-bold text-slate-700 mb-2">Temukan Gaya Belajarmu</h4>
-                        <p class="text-slate-500 text-sm max-w-md mx-auto mb-6">Masuk untuk melihat profil gaya belajarmu berdasarkan tes VAK. Ketahui apakah kamu tipe Visual, Auditori, atau Kinestetik!</p>
-                        <a href="login.php" class="inline-block bg-[#6C5CE7] text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-[#5B4ED1] transition">
-                            Masuk Sekarang
-                        </a>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <?php if ($is_logged_in): ?>
-    <dialog id="modalKonsul" class="modal p-0 rounded-2xl shadow-2xl backdrop:bg-black/40 w-full max-w-lg open:animate-fade-in">
-        <div class="bg-white p-8">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-bold text-2xl text-slate-800">Buat Janji Konsultasi</h3>
-                <button onclick="document.getElementById('modalKonsul').close()" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                </button>
-            </div>
-            
-            <form method="POST" class="space-y-5">
+            <!-- Stats/Trust -->
+            <div class="mt-16 pt-8 border-t border-slate-200/60 max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Guru BK</label>
-                    <div class="relative">
-                        <select name="id_konselor" required class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#6C5CE7] focus:ring-4 focus:ring-[#6C5CE7]/10 transition">
-                            <option value="">-- Pilih Guru --</option>
-                            <?php if ($list_konselor): ?>
-                            <?php while($k = $list_konselor->fetch_assoc()): ?>
-                                <option value="<?= $k['id'] ?>"><?= $k['nama_lengkap'] ?></option>
-                            <?php endwhile; ?>
-                            <?php endif; ?>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
-                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                        </div>
-                    </div>
+                    <h4 class="text-3xl font-bold text-slate-900">500+</h4>
+                    <p class="text-sm text-slate-500">Siswa Terdaftar</p>
                 </div>
-                
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Topik</label>
-                    <div class="relative">
-                        <select name="topik" required class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#6C5CE7] focus:ring-4 focus:ring-[#6C5CE7]/10 transition">
-                            <option value="Akademik">Akademik</option>
-                            <option value="Pribadi">Pribadi</option>
-                            <option value="Sosial">Sosial</option>
-                            <option value="Karir">Karir</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
-                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                        </div>
-                    </div>
+                    <h4 class="text-3xl font-bold text-slate-900">24/7</h4>
+                    <p class="text-sm text-slate-500">Akses Online</p>
                 </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tanggal</label>
-                        <input type="date" name="tanggal" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#6C5CE7] focus:ring-4 focus:ring-[#6C5CE7]/10 transition" min="<?= date('Y-m-d') ?>">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Jam</label>
-                        <input type="time" name="jam" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#6C5CE7] focus:ring-4 focus:ring-[#6C5CE7]/10 transition">
-                    </div>
-                </div>
-
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Keluhan / Masalah</label>
-                    <textarea name="keluhan" rows="3" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#6C5CE7] focus:ring-4 focus:ring-[#6C5CE7]/10 transition" placeholder="Ceritakan sedikit apa yang ingin kamu bahas..."></textarea>
+                    <h4 class="text-3xl font-bold text-slate-900">100%</h4>
+                    <p class="text-sm text-slate-500">Rahasia Terjamin</p>
                 </div>
-
-                <div class="pt-4">
-                    <button type="submit" name="submit_konsul" class="w-full bg-[#6C5CE7] hover:bg-[#5B4ED1] text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-purple-200 transform active:scale-[0.98]">
-                        Kirim Permintaan
-                    </button>
+                 <div>
+                    <h4 class="text-3xl font-bold text-slate-900">VAK</h4>
+                    <p class="text-sm text-slate-500">Tes Gaya Belajar</p>
                 </div>
-            </form>
+            </div>
         </div>
-    </dialog>
+    </section>
 
-    <script>
-        <?php if ($vak_data): ?>
-        const ctx = document.getElementById('vakChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Visual', 'Auditori', 'Kinestetik'],
-                datasets: [{
-                    data: [<?= $vak_counts['Visual'] ?>, <?= $vak_counts['Auditori'] ?>, <?= $vak_counts['Kinestetik'] ?>],
-                    backgroundColor: [
-                        '#873de9ff',
-                        '#e1ff69ff', 
-                        '#f03c3cff'  
-                    ],
-                    borderWidth: 0,
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20,
-                            font: {
-                                family: "'Lexend', sans-serif"
-                            }
-                        }
-                    }
-                },
-                cutout: '70%'
-            }
-        });
-        <?php endif; ?>
-    </script>
-    <?php endif; ?>
+    <!-- Features Section -->
+    <section id="fitur" class="py-20 bg-white relative">
+        <div class="container mx-auto px-6">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Fitur Unggulan</h2>
+                <p class="text-slate-500">Kami menyediakan berbagai layanan untuk mendukung kesehatan mental dan pengembangan diri siswa.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-slate-50 p-8 rounded-3xl border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition duration-300 group">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Konseling Online</h3>
+                    <p class="text-slate-500 leading-relaxed">Jadwalkan sesi konsultasi dengan guru BK kapan saja dan di mana saja tanpa rasa canggung.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="bg-slate-50 p-8 rounded-3xl border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition duration-300 group">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Tes Gaya Belajar</h3>
+                    <p class="text-slate-500 leading-relaxed">Ketahui gaya belajarmu (Visual, Auditori, Kinestetik) untuk memaksimalkan potensi akademis.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="bg-slate-50 p-8 rounded-3xl border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition duration-300 group">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Rahasia Terjamin</h3>
+                    <p class="text-slate-500 leading-relaxed">Privasimu adalah prioritas kami. Semua sesi konseling dilakukan dalam lingkungan yang aman.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20">
+        <div class="container mx-auto px-6">
+            <div class="bg-primary rounded-[2.5rem] p-10 md:p-16 text-center text-white relative overflow-hidden">
+                <!-- Background Pattern -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full -ml-16 -mb-16 blur-3xl"></div>
+
+                <div class="relative z-10 max-w-2xl mx-auto">
+                    <h2 class="text-3xl md:text-5xl font-bold mb-6">Siap Untuk Memulai?</h2>
+                    <p class="text-purple-100 text-lg mb-10">Jangan biarkan masalahmu berlarut-larut. Mari cari solusinya bersama kami hari ini.</p>
+                    <a href="register.php" class="inline-block bg-white text-primary px-10 py-4 rounded-2xl font-bold text-lg hover:bg-purple-50 transition shadow-lg transform hover:-translate-y-1">
+                        Daftar Akun Gratis
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-50 pt-20 pb-10 border-t border-slate-200">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
+                <div class="flex items-center gap-2">
+                    <div class="bg-white border border-slate-200 p-2 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                    </div>
+                    <span class="font-bold text-xl text-slate-800">BK<span class="text-yellow-500">Skaju</span></span>
+                </div>
+                <p class="text-slate-500 text-sm">© 2026 SMKN 7 Batam.</p>
+            </div>
+        </div>
+    </footer>
 
 </body>
 </html>

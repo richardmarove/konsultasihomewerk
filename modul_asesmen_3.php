@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $success_karir = $conn->query($sql_karir);
 
     if ($success_mental && $success_karir) {
-        header("Location: index.php");
+        header("Location: dashboard_siswa.php");
     } else {
         echo "Error: " . $conn->error;
     }

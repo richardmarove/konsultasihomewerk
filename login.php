@@ -2,7 +2,7 @@
 session_start();
 // Redirect already logged-in students to dashboard
 if (isset($_SESSION['user_id']) && $_SESSION['peran'] == 'siswa') {
-    header("Location: index.php");
+    header("Location: dashboard_siswa.php");
     exit;
 }
 ?>
