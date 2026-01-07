@@ -60,57 +60,64 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-optical-sizing: auto;
             font-weight: 400;
             font-style: normal;
-            }
+        }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center py-10 lexend-font">
+<body class="bg-slate-50 py-10 lexend-font min-h-screen flex items-center justify-center">
 
-    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
+    <div class="w-full max-w-2xl mx-auto bg-white shadow-xl rounded-xl overflow-hidden">
         
-        <div class="md:w-1/3 bg-blue-600 p-8 text-white flex flex-col justify-center items-center text-center">
-            <h2 class="text-3xl font-bold mb-4">Pendaftaran</h2>
-            <p class="opacity-90 mb-6">Membutuhkan akun untuk menggunakan aplikasi ini.</p>
-            <div class="text-6xl">🚀</div>
-            <a href="login.php" class="mt-8 text-sm underline text-blue-200 hover:text-white">Kembali ke Login</a>
+        <div class="bg-blue-600 p-6 text-white text-center">
+            <h2 class="text-2xl font-bold">Pendaftaran Siswa Baru</h2>
+            <p class="text-blue-100 text-sm mt-1">Lengkapi data diri Anda untuk membuat akun.</p>
         </div>
 
-        <div class="md:w-2/3 p-8">
-            <h2 class="text-2xl font-bold text-slate-800 mb-6">Form Pendaftaran Siswa</h2>
-
+        <div class="p-8">
             <?php if($error): ?>
-                <div class="bg-red-100 text-red-600 p-3 rounded mb-4 text-sm"><?= $error ?></div>
+                <div class="bg-red-100 text-red-600 p-4 rounded-lg mb-6 text-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                    <?= $error ?>
+                </div>
             <?php endif; ?>
             
             <?php if($success): ?>
-                <div class="bg-green-100 text-green-600 p-3 rounded mb-4 text-sm">
-                    <?= $success ?> <a href="login.php" class="font-bold underline">Login disini</a>.
+                <div class="bg-green-100 text-green-700 p-4 rounded-lg mb-6 text-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span><?= $success ?> <a href="login.php" class="font-bold underline hover:text-green-900 ml-1">Login disini</a>.</span>
                 </div>
             <?php endif; ?>
 
-            <form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form method="POST" class="space-y-6">
                 
-                <div class="space-y-4">
-                    <h3 class="text-sm font-bold text-blue-600 uppercase tracking-wide">Data Sekolah</h3>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600">NIS</label>
-                        <input type="text" name="nis" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600">Nama Lengkap</label>
-                        <input type="text" name="nama_lengkap" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <h3 class="text-sm font-bold text-blue-600 uppercase tracking-wide border-b border-blue-100 pb-2 mb-4">Data Sekolah</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
+                            <input type="text" name="nama_lengkap" required class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none">
+                        </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600">Kelas</label>
-                            <select name="tingkat_kelas" class="w-full border rounded px-3 py-2">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">NIS</label>
+                            <input type="text" name="nis" required class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Jenis Kelamin</label>
+                            <div class="flex gap-4 mt-2">
+                                <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="jenis_kelamin" value="L" required class="mr-2 text-blue-600 focus:ring-blue-500"> Laki-laki</label>
+                                <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="jenis_kelamin" value="P" class="mr-2 text-blue-600 focus:ring-blue-500"> Perempuan</label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Kelas</label>
+                            <select name="tingkat_kelas" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none bg-white">
                                 <option value="10">10</option>
                                 <option value="11">11</option>
                                 <option value="12">12</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600">Jurusan</label>
-                            <select name="jurusan" class="w-full border rounded px-3 py-2">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Jurusan</label>
+                            <select name="jurusan" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none bg-white">
                                 <option value="RPL">RPL</option>
                                 <option value="TKJ">TKJ</option>
                                 <option value="DKV">DKV</option>
@@ -118,31 +125,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </select>
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600">Jenis Kelamin</label>
-                        <div class="flex gap-4 mt-1">
-                            <label class="flex items-center text-sm"><input type="radio" name="jenis_kelamin" value="L" required class="mr-1"> Laki-laki</label>
-                            <label class="flex items-center text-sm"><input type="radio" name="jenis_kelamin" value="P" class="mr-1"> Perempuan</label>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-bold text-blue-600 uppercase tracking-wide border-b border-blue-100 pb-2 mb-4">Data Akun</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                            <input type="email" name="email" required class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                            <input type="password" name="password" required class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none">
                         </div>
                     </div>
                 </div>
 
-                <div class="space-y-4">
-                    <h3 class="text-sm font-bold text-blue-600 uppercase tracking-wide">Data Akun</h3>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600">Email</label>
-                        <input type="email" name="email" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600">Password</label>
-                        <input type="password" name="password" required class="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div class="pt-4">
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow-lg">
-                            Daftar Sekarang
-                        </button>
-                    </div>
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-blue-200 transform active:scale-[0.98]">
+                        Daftar Pembelajaran
+                    </button>
                 </div>
+
+                <p class="text-center text-sm text-slate-500 mt-6">
+                    Sudah punya akun? <a href="login.php" class="text-blue-600 font-bold hover:underline">Masuk disini</a>
+                </p>
 
             </form>
         </div>
