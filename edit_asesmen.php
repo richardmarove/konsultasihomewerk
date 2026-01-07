@@ -158,85 +158,87 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body class="bg-slate-50 py-10 lexend-font">
 
     <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-xl overflow-hidden">
-        <div class="bg-indigo-600 p-6 text-white flex justify-between items-center">
+        <div class="bg-teal-600 p-6 text-white flex justify-between items-center">
             <div>
                 <h2 class="text-xl font-bold">Edit Data Asesmen</h2>
-                <p class="text-indigo-100 text-sm">Perbarui informasi Anda jika ada perubahan.</p>
+                <p class="text-teal-100 text-sm">Perbarui informasi Anda jika ada perubahan.</p>
             </div>
             <a href="dashboard_siswa.php" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded transition text-sm">Kembali</a>
         </div>
 
-        <form method="POST" class="p-8 space-y-10" onsubmit="return validateCheckbox()">
+        <form method="POST" class="p-8 space-y-8" onsubmit="return validateCheckbox()">
             
-            <section class="space-y-4">
-                <h3 class="text-lg font-bold text-indigo-700 border-b pb-2">1. Data Keluarga & Ekonomi</h3>
+            <!-- SECTION 1: Data Keluarga -->
+            <section class="space-y-6">
+                <h3 class="text-lg font-bold text-slate-800 border-b pb-2">1. Data Keluarga & Ekonomi</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm text-slate-600">Nama Ayah</label>
-                        <input type="text" name="nama_ayah" value="<?= getVal($data_keluarga, 'nama_ayah') ?>" required class="w-full border p-2 rounded">
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Nama Ayah</label>
+                        <input type="text" name="nama_ayah" value="<?= getVal($data_keluarga, 'nama_ayah') ?>" required class="w-full border-slate-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm border p-2">
                     </div>
-                    <div>
-                        <label class="block text-sm text-slate-600">Pekerjaan Ayah</label>
-                        <input type="text" name="pekerjaan_ayah" value="<?= getVal($data_keluarga, 'pekerjaan_ayah') ?>" required class="w-full border p-2 rounded">
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Pekerjaan Ayah</label>
+                        <input type="text" name="pekerjaan_ayah" value="<?= getVal($data_keluarga, 'pekerjaan_ayah') ?>" required class="w-full border-slate-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm border p-2">
                     </div>
-                    <div>
-                        <label class="block text-sm text-slate-600">Nama Ibu</label>
-                        <input type="text" name="nama_ibu" value="<?= getVal($data_keluarga, 'nama_ibu') ?>" required class="w-full border p-2 rounded">
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Nama Ibu</label>
+                        <input type="text" name="nama_ibu" value="<?= getVal($data_keluarga, 'nama_ibu') ?>" required class="w-full border-slate-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm border p-2">
                     </div>
-                    <div>
-                        <label class="block text-sm text-slate-600">Pekerjaan Ibu</label>
-                        <input type="text" name="pekerjaan_ibu" value="<?= getVal($data_keluarga, 'pekerjaan_ibu') ?>" required class="w-full border p-2 rounded">
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Pekerjaan Ibu</label>
+                        <input type="text" name="pekerjaan_ibu" value="<?= getVal($data_keluarga, 'pekerjaan_ibu') ?>" required class="w-full border-slate-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm border p-2">
                     </div>
-                    <div>
-                        <label class="block text-sm text-slate-600">Status Ekonomi</label>
-                        <select name="status_ekonomi" class="w-full border p-2 rounded">
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Status Ekonomi</label>
+                        <select name="status_ekonomi" class="w-full border-slate-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm border p-2">
                             <option value="Mampu" <?= getVal($data_keluarga, 'status_ekonomi') == 'Mampu' ? 'selected' : '' ?>>Mampu</option>
                             <option value="Cukup" <?= getVal($data_keluarga, 'status_ekonomi') == 'Cukup' ? 'selected' : '' ?>>Cukup</option>
                             <option value="Kurang Mampu" <?= getVal($data_keluarga, 'status_ekonomi') == 'Kurang Mampu' ? 'selected' : '' ?>>Kurang Mampu</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="block text-sm text-slate-600">Jumlah Saudara</label>
-                        <input type="number" name="jumlah_saudara" value="<?= getVal($data_keluarga, 'jumlah_saudara') ?>" required class="w-full border p-2 rounded">
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Jumlah Saudara</label>
+                        <input type="number" name="jumlah_saudara" value="<?= getVal($data_keluarga, 'jumlah_saudara') ?>" required class="w-full border-slate-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm border p-2">
                     </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm text-slate-600">Alamat Lengkap</label>
-                        <textarea name="alamat" rows="2" required class="w-full border p-2 rounded"><?= getVal($data_keluarga, 'alamat') ?></textarea>
+                    <div class="md:col-span-2 space-y-2">
+                        <label class="block text-slate-700 font-medium">Alamat Lengkap</label>
+                        <textarea name="alamat" rows="2" required class="w-full border-slate-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm border p-2"><?= getVal($data_keluarga, 'alamat') ?></textarea>
                     </div>
                 </div>
             </section>
 
+            <!-- SECTION 2: Kondisi Keluarga -->
             <?php $kep = getVal($data_asesmen, 'kepribadian', []); ?>
-            <section class="space-y-4">
-                <h3 class="text-lg font-bold text-indigo-700 border-b pb-2">2. Kondisi Keluarga (Sosial)</h3>
+            <section class="space-y-6 pt-6 border-t">
+                <h3 class="text-lg font-bold text-slate-800 border-b pb-2">2. Kondisi Keluarga (Sosial)</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm text-slate-600 mb-2">Status Orang Tua</label>
-                        <select name="q1_status_ortu" class="w-full border p-2 rounded">
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Status Orang Tua</label>
+                        <select name="q1_status_ortu" class="w-full border-slate-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm border p-2">
                             <option value="Lengkap" <?= isChecked($kep, 'q1_status_ortu', 'Lengkap') ? 'selected' : '' ?>>Lengkap</option>
                             <option value="Bercerai" <?= isChecked($kep, 'q1_status_ortu', 'Bercerai') ? 'selected' : '' ?>>Bercerai</option>
                             <option value="Yatim" <?= isChecked($kep, 'q1_status_ortu', 'Yatim') ? 'selected' : '' ?>>Yatim/Piatu</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="block text-sm text-slate-600 mb-2">Suasana Rumah</label>
-                        <select name="q2_status_ortu" class="w-full border p-2 rounded">
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Suasana Rumah</label>
+                        <select name="q2_status_ortu" class="w-full border-slate-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm border p-2">
                             <option value="Tenang" <?= isChecked($kep, 'q2_status_ortu', 'Tenang') ? 'selected' : '' ?>>Tenang</option>
                             <option value="Ramai" <?= isChecked($kep, 'q2_status_ortu', 'Ramai') ? 'selected' : '' ?>>Ramai</option>
                             <option value="Konflik" <?= isChecked($kep, 'q2_status_ortu', 'Konflik') ? 'selected' : '' ?>>Berkonflik</option>
                             <option value="Sepi" <?= isChecked($kep, 'q2_status_ortu', 'Sepi') ? 'selected' : '' ?>>Sepi</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="block text-sm text-slate-600 mb-2">Penerima KIP/KKS?</label>
-                        <select name="q3_status_ortu" class="w-full border p-2 rounded">
-                            <option value="Ya" <?= isChecked($kep, 'q3_status_ortu', 'Ya') ? 'selected' : '' ?>>Ya</option>
-                            <option value="Tidak" <?= isChecked($kep, 'q3_status_ortu', 'Tidak') ? 'selected' : '' ?>>Tidak</option>
-                        </select>
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Penerima KIP/KKS?</label>
+                        <div class="flex gap-6 mt-2">
+                             <label class="flex items-center cursor-pointer"><input type="radio" name="q3_status_ortu" value="Ya" class="form-radio text-teal-600" <?= isChecked($kep, 'q3_status_ortu', 'Ya') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Ya</span></label>
+                             <label class="flex items-center cursor-pointer"><input type="radio" name="q3_status_ortu" value="Tidak" class="form-radio text-teal-600" <?= isChecked($kep, 'q3_status_ortu', 'Tidak') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Tidak</span></label>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm text-slate-600 mb-2">Transportasi</label>
-                        <select name="q4_status_ortu" class="w-full border p-2 rounded">
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Transportasi</label>
+                        <select name="q4_status_ortu" class="w-full border-slate-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm border p-2">
                             <option value="Jalan Kaki" <?= isChecked($kep, 'q4_status_ortu', 'Jalan Kaki') ? 'selected' : '' ?>>Jalan Kaki</option>
                             <option value="Angkot" <?= isChecked($kep, 'q4_status_ortu', 'Angkot') ? 'selected' : '' ?>>Angkot</option>
                             <option value="Diantar" <?= isChecked($kep, 'q4_status_ortu', 'Diantar') ? 'selected' : '' ?>>Diantar</option>
@@ -246,37 +248,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
             </section>
 
+            <!-- SECTION 3: Gaya Belajar -->
             <?php $gb = getVal($data_asesmen, 'gaya_belajar', []); ?>
-            <section class="space-y-4">
-                <h3 class="text-lg font-bold text-indigo-700 border-b pb-2">3. Gaya Belajar (VAK)</h3>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-slate-600 mb-1">Cara belajar paling cepat?</label>
-                        <select name="q1_gaya_belajar" class="w-full border p-2 rounded">
+            <section class="space-y-6 pt-6 border-t">
+                <h3 class="text-lg font-bold text-slate-800 border-b pb-2">3. Gaya Belajar (VAK)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Cara belajar paling cepat?</label>
+                        <select name="q1_gaya_belajar" class="w-full border-slate-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm border p-2">
                             <option value="Visual" <?= isChecked($gb, 'q1_gaya_belajar', 'Visual') ? 'selected' : '' ?>>Membaca/Melihat</option>
                             <option value="Auditori" <?= isChecked($gb, 'q1_gaya_belajar', 'Auditori') ? 'selected' : '' ?>>Mendengar/Diskusi</option>
                             <option value="Kinestetik" <?= isChecked($gb, 'q1_gaya_belajar', 'Kinestetik') ? 'selected' : '' ?>>Praktik</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="block text-sm text-slate-600 mb-1">Aktivitas waktu luang?</label>
-                        <select name="q2_gaya_belajar" class="w-full border p-2 rounded">
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Aktivitas waktu luang?</label>
+                        <select name="q2_gaya_belajar" class="w-full border-slate-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm border p-2">
                             <option value="Visual" <?= isChecked($gb, 'q2_gaya_belajar', 'Visual') ? 'selected' : '' ?>>Nonton/Baca</option>
                             <option value="Auditori" <?= isChecked($gb, 'q2_gaya_belajar', 'Auditori') ? 'selected' : '' ?>>Musik/Ngobrol</option>
                             <option value="Kinestetik" <?= isChecked($gb, 'q2_gaya_belajar', 'Kinestetik') ? 'selected' : '' ?>>Olahraga/Gaming</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="block text-sm text-slate-600 mb-1">Cara mengingat jalan?</label>
-                        <select name="q3_gaya_belajar" class="w-full border p-2 rounded">
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Cara mengingat jalan?</label>
+                        <select name="q3_gaya_belajar" class="w-full border-slate-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm border p-2">
                             <option value="Visual" <?= isChecked($gb, 'q3_gaya_belajar', 'Visual') ? 'selected' : '' ?>>Bayangkan Peta</option>
                             <option value="Auditori" <?= isChecked($gb, 'q3_gaya_belajar', 'Auditori') ? 'selected' : '' ?>>Tanya Orang</option>
                             <option value="Kinestetik" <?= isChecked($gb, 'q3_gaya_belajar', 'Kinestetik') ? 'selected' : '' ?>>Jalan Saja</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="block text-sm text-slate-600 mb-1">Ekspresi saat marah?</label>
-                        <select name="q4_gaya_belajar" class="w-full border p-2 rounded">
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Ekspresi saat marah?</label>
+                        <select name="q4_gaya_belajar" class="w-full border-slate-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm border p-2">
                             <option value="Visual" <?= isChecked($gb, 'q4_gaya_belajar', 'Visual') ? 'selected' : '' ?>>Diam/Cemberut</option>
                             <option value="Auditori" <?= isChecked($gb, 'q4_gaya_belajar', 'Auditori') ? 'selected' : '' ?>>Ngomel/Teriak</option>
                             <option value="Kinestetik" <?= isChecked($gb, 'q4_gaya_belajar', 'Kinestetik') ? 'selected' : '' ?>>Banting Barang/Pergi</option>
@@ -285,88 +288,90 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
             </section>
 
+            <!-- SECTION 4: Kesehatan Mental -->
             <?php $km = getVal($data_asesmen, 'kesehatan_mental', []); ?>
-            <section class="space-y-4">
-                <h3 class="text-lg font-bold text-indigo-700 border-b pb-2">4. Kesehatan Mental</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm text-slate-600 mb-1">Nyaman & punya teman?</label>
-                        <select name="q1" class="w-full border p-2 rounded">
-                            <option value="Ya" <?= isChecked($km, 'q1_nyaman_teman', 'Ya') ? 'selected' : '' ?>>Ya</option>
-                            <option value="Tidak" <?= isChecked($km, 'q1_nyaman_teman', 'Tidak') ? 'selected' : '' ?>>Tidak</option>
-                        </select>
+            <section class="space-y-6 pt-6 border-t">
+                <h3 class="text-lg font-bold text-slate-800 border-b pb-2">4. Kesehatan Mental</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Nyaman & punya teman?</label>
+                        <div class="flex gap-6 mt-2">
+                            <label class="flex items-center cursor-pointer"><input type="radio" name="q1" value="Ya" class="form-radio text-teal-600" <?= isChecked($km, 'q1_nyaman_teman', 'Ya') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Ya</span></label>
+                            <label class="flex items-center cursor-pointer"><input type="radio" name="q1" value="Tidak" class="form-radio text-teal-600" <?= isChecked($km, 'q1_nyaman_teman', 'Tidak') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Tidak</span></label>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm text-slate-600 mb-1">Cemas berlebihan?</label>
-                        <select name="q2" class="w-full border p-2 rounded">
-                            <option value="Ya" <?= isChecked($km, 'q2_cemas', 'Ya') ? 'selected' : '' ?>>Ya</option>
-                            <option value="Tidak" <?= isChecked($km, 'q2_cemas', 'Tidak') ? 'selected' : '' ?>>Tidak</option>
-                        </select>
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Cemas berlebihan?</label>
+                        <div class="flex gap-6 mt-2">
+                            <label class="flex items-center cursor-pointer"><input type="radio" name="q2" value="Ya" class="form-radio text-teal-600" <?= isChecked($km, 'q2_cemas', 'Ya') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Ya</span></label>
+                            <label class="flex items-center cursor-pointer"><input type="radio" name="q2" value="Tidak" class="form-radio text-teal-600" <?= isChecked($km, 'q2_cemas', 'Tidak') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Tidak</span></label>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm text-slate-600 mb-1">Mudah bercerita?</label>
-                        <select name="q3" class="w-full border p-2 rounded">
-                            <option value="Ya" <?= isChecked($km, 'q3_cerita', 'Ya') ? 'selected' : '' ?>>Ya</option>
-                            <option value="Tidak" <?= isChecked($km, 'q3_cerita', 'Tidak') ? 'selected' : '' ?>>Tidak</option>
-                        </select>
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Mudah bercerita?</label>
+                        <div class="flex gap-6 mt-2">
+                            <label class="flex items-center cursor-pointer"><input type="radio" name="q3" value="Ya" class="form-radio text-teal-600" <?= isChecked($km, 'q3_cerita', 'Ya') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Ya</span></label>
+                            <label class="flex items-center cursor-pointer"><input type="radio" name="q3" value="Tidak" class="form-radio text-teal-600" <?= isChecked($km, 'q3_cerita', 'Tidak') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Tidak</span></label>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm text-slate-600 mb-1">Tertekan akademik?</label>
-                        <select name="q4" class="w-full border p-2 rounded">
-                            <option value="Ya" <?= isChecked($km, 'q4_tekanan_akademik', 'Ya') ? 'selected' : '' ?>>Ya</option>
-                            <option value="Tidak" <?= isChecked($km, 'q4_tekanan_akademik', 'Tidak') ? 'selected' : '' ?>>Tidak</option>
-                        </select>
+                    <div class="space-y-2">
+                        <label class="block text-slate-700 font-medium">Tertekan akademik?</label>
+                        <div class="flex gap-6 mt-2">
+                           <label class="flex items-center cursor-pointer"><input type="radio" name="q4" value="Ya" class="form-radio text-teal-600" <?= isChecked($km, 'q4_tekanan_akademik', 'Ya') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Ya</span></label>
+                           <label class="flex items-center cursor-pointer"><input type="radio" name="q4" value="Tidak" class="form-radio text-teal-600" <?= isChecked($km, 'q4_tekanan_akademik', 'Tidak') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Tidak</span></label>
+                        </div>
                     </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm text-red-600 font-bold mb-1">Mengalami Bullying?</label>
-                        <select name="q5" class="w-full border border-red-200 bg-red-50 p-2 rounded text-red-700">
-                            <option value="Ya" <?= isChecked($km, 'q5_bullying', 'Ya') ? 'selected' : '' ?>>Ya</option>
-                            <option value="Tidak" <?= isChecked($km, 'q5_bullying', 'Tidak') ? 'selected' : '' ?>>Tidak</option>
-                        </select>
+                    <div class="md:col-span-2 bg-red-50 p-4 rounded-lg border border-red-100 mt-2">
+                        <label class="block text-red-800 font-bold mb-2">Pernah mengalami Bullying?</label>
+                        <div class="flex gap-6">
+                            <label class="flex items-center cursor-pointer"><input type="radio" name="q5" value="Ya" class="form-radio text-red-600" <?= isChecked($km, 'q5_bullying', 'Ya') ? 'checked' : '' ?>> <span class="ml-2 text-red-700 font-medium">Ya</span></label>
+                            <label class="flex items-center cursor-pointer"><input type="radio" name="q5" value="Tidak" class="form-radio text-red-600" <?= isChecked($km, 'q5_bullying', 'Tidak') ? 'checked' : '' ?>> <span class="ml-2 text-red-700 font-medium">Tidak</span></label>
+                        </div>
                     </div>
                 </div>
             </section>
 
+            <!-- SECTION 5: Minat Karir -->
             <?php $mk = getVal($data_asesmen, 'minat_karir', []); ?>
-            <section class="space-y-4">
-                <h3 class="text-lg font-bold text-indigo-700 border-b pb-2">5. Minat Karir</h3>
-                <div>
-                    <label class="block text-sm text-slate-600 mb-2">Rencana setelah lulus?</label>
-                    <select name="karir_q1" class="w-full border p-2 rounded">
-                        <option value="Kuliah" <?= isChecked($mk, 'rencana_lulus', 'Kuliah') ? 'selected' : '' ?>>Kuliah</option>
-                        <option value="Kerja/Wirausaha" <?= isChecked($mk, 'rencana_lulus', 'Kerja/Wirausaha') ? 'selected' : '' ?>>Kerja/Wirausaha</option>
-                        <option value="Sekolah Kedinasan" <?= isChecked($mk, 'rencana_lulus', 'Sekolah Kedinasan') ? 'selected' : '' ?>>Sekolah Kedinasan</option>
-                        <option value="Belum Tahu/Bingung" <?= isChecked($mk, 'rencana_lulus', 'Belum Tahu/Bingung') ? 'selected' : '' ?>>Belum Tahu/Bingung</option>
-                    </select>
+            <section class="space-y-6 pt-6 border-t">
+                <h3 class="text-lg font-bold text-slate-800 border-b pb-2">5. Minat Karir</h3>
+                <div class="space-y-2">
+                    <label class="block text-slate-700 font-medium">Rencana setelah lulus sekolah?</label>
+                    <div class="flex flex-col space-y-2 mt-2">
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q1" value="Kuliah" class="form-radio text-teal-600" <?= isChecked($mk, 'rencana_lulus', 'Kuliah') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Kuliah</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q1" value="Kerja/Wirausaha" class="form-radio text-teal-600" <?= isChecked($mk, 'rencana_lulus', 'Kerja/Wirausaha') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Kerja/Wirausaha</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q1" value="Sekolah Kedinasan" class="form-radio text-teal-600" <?= isChecked($mk, 'rencana_lulus', 'Sekolah Kedinasan') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Sekolah Kedinasan</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q1" value="Belum Tahu/Bingung" class="form-radio text-teal-600" <?= isChecked($mk, 'rencana_lulus', 'Belum Tahu/Bingung') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Belum Tahu/Bingung</span></label>
+                    </div>
                 </div>
                 
-                <div>
-                    <label class="block text-sm text-slate-600 mb-2">Mata Pelajaran Favorit (Pilih maks 3)</label>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <div class="space-y-2">
+                    <label class="block text-slate-700 font-medium">Mata Pelajaran Favorit (Pilih maks 3)</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
                         <?php 
                         $mapel_opts = ["Matematika", "Olahraga", "KK", "Bahasa Indonesia", "Agama", "MPP", "Bahasa Inggris"];
                         foreach ($mapel_opts as $m) {
                             $checked = isChecked($mk, 'mapel_favorit', $m);
-                            echo "<label class='flex items-center space-x-2'><input type='checkbox' name='karir_q2[]' value='$m' $checked class='rounded text-indigo-600'> <span>$m</span></label>";
+                            echo "<label class='flex items-center space-x-2 cursor-pointer bg-slate-50 p-2 rounded hover:bg-slate-100 transition'><input type='checkbox' name='karir_q2[]' value='$m' $checked class='rounded text-teal-600 form-checkbox'> <span class='text-slate-700'>$m</span></label>";
                         }
                         ?>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm text-slate-600 mb-2">Bidang Pekerjaan Diminati</label>
-                    <select name="karir_q3" class="w-full border p-2 rounded">
-                        <option value="Teknik & Komputer" <?= isChecked($mk, 'minat_pekerjaan', 'Teknik & Komputer') ? 'selected' : '' ?>>Teknik & Komputer</option>
-                        <option value="Kesehatan" <?= isChecked($mk, 'minat_pekerjaan', 'Kesehatan') ? 'selected' : '' ?>>Kesehatan</option>
-                        <option value="Seni & Kreatif" <?= isChecked($mk, 'minat_pekerjaan', 'Seni & Kreatif') ? 'selected' : '' ?>>Seni & Kreatif</option>
-                        <option value="Sosial & Hukum" <?= isChecked($mk, 'minat_pekerjaan', 'Sosial & Hukum') ? 'selected' : '' ?>>Sosial & Hukum</option>
-                        <option value="Bisnis & Manajemen" <?= isChecked($mk, 'minat_pekerjaan', 'Bisnis & Manajemen') ? 'selected' : '' ?>>Bisnis & Manajemen</option>
-                    </select>
+                <div class="space-y-2">
+                    <label class="block text-slate-700 font-medium">Bidang Pekerjaan Diminati</label>
+                    <div class="flex flex-col space-y-2 mt-2">
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q3" value="Teknik & Komputer" class="form-radio text-teal-600" <?= isChecked($mk, 'minat_pekerjaan', 'Teknik & Komputer') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Teknik & Komputer</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q3" value="Kesehatan" class="form-radio text-teal-600" <?= isChecked($mk, 'minat_pekerjaan', 'Kesehatan') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Kesehatan</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q3" value="Seni & Kreatif" class="form-radio text-teal-600" <?= isChecked($mk, 'minat_pekerjaan', 'Seni & Kreatif') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Seni & Kreatif</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q3" value="Sosial & Hukum" class="form-radio text-teal-600" <?= isChecked($mk, 'minat_pekerjaan', 'Sosial & Hukum') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Sosial & Hukum</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q3" value="Bisnis & Manajemen" class="form-radio text-teal-600" <?= isChecked($mk, 'minat_pekerjaan', 'Bisnis & Manajemen') ? 'checked' : '' ?>> <span class="ml-2 text-slate-600">Bisnis & Manajemen</span></label>
+                    </div>
                 </div>
             </section>
 
             <div class="pt-6 border-t">
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded transition shadow-lg">
+                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg transition shadow-lg transform hover:-translate-y-0.5">
                     Simpan Perubahan
                 </button>
             </div>
