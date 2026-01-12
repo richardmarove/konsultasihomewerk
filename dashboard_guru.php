@@ -169,7 +169,7 @@ $res_schedule = $conn->query($sql_schedule);
                                         <span class="text-xs font-bold uppercase"><?= date('M', strtotime($sch['tanggal_konsultasi'])) ?></span>
                                         <span class="text-xl font-bold"><?= date('d', strtotime($sch['tanggal_konsultasi'])) ?></span>
                                     </div>
-                                    <div>
+                                    <div class="flex-grow">
                                         <h4 class="font-bold text-slate-800">
                                             <a href="detail_siswa.php?id=<?= $sch['id_siswa'] ?>" class="hover:text-[#6C5CE7] hover:underline transition">
                                                 <?= $sch['nama_lengkap'] ?>
@@ -177,6 +177,9 @@ $res_schedule = $conn->query($sql_schedule);
                                         </h4>
                                         <p class="text-sm text-slate-500"><?= date('H:i', strtotime($sch['tanggal_konsultasi'])) ?> WIB • <?= $sch['kategori_topik'] ?></p>
                                     </div>
+                                    <a href="tulis_laporan.php?id=<?= $sch['id'] ?>" class="bg-white border border-slate-200 text-slate-600 hover:text-[#6C5CE7] hover:border-[#6C5CE7] px-3 py-2 rounded-lg text-xs font-bold transition">
+                                        Isi Laporan
+                                    </a>
                                 </div>
                             <?php endwhile; ?>
                         </div>
