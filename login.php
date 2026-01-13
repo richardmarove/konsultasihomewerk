@@ -97,18 +97,40 @@ if (isset($_SESSION['user_id']) && $_SESSION['peran'] == 'siswa') {
             <form action="auth_process.php" method="POST" class="space-y-6">
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">Email Sekolah</label>
-                    <input type="email" name="email" required placeholder="nama@siswa.smkn7batam.sch.id"
-                           class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition font-medium text-slate-700 placeholder:text-slate-400">
+                    <input type="email" name="email" required placeholder="rickymarove@gmail.com"
+                           class="w-full px-5 py-4 bg-slate-100 border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition font-medium text-slate-700 placeholder:text-slate-400">
                 </div>
                 
                 <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="block text-sm font-bold text-slate-700">Password</label>
-                        <a href="#" class="text-sm font-semibold text-primary hover:text-secondary transition">Lupa password?</a>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Password</label>
+                    <div class="relative">
+                        <input type="password" name="password" id="passwordInput" required placeholder="••••••••"
+                               class="w-full px-5 py-4 bg-slate-100 border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition font-medium text-slate-700 placeholder:text-slate-400 pr-12">
+                        <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="eyeIcon">
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
                     </div>
-                    <input type="password" name="password" required placeholder="••••••••"
-                           class="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition font-medium text-slate-700 placeholder:text-slate-400">
                 </div>
+
+                <script>
+                    function togglePassword() {
+                        const passwordInput = document.getElementById('passwordInput');
+                        const eyeIcon = document.getElementById('eyeIcon');
+                        
+                        if (passwordInput.type === 'password') {
+                            passwordInput.type = 'text';
+                            // Icon for "Hide" (Slash)
+                            eyeIcon.innerHTML = '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>';
+                        } else {
+                            passwordInput.type = 'password';
+                            // Icon for "Show" (Normal Eye)
+                            eyeIcon.innerHTML = '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
+                        }
+                    }
+                </script>
 
                 <button type="submit" 
                         class="w-full bg-primary hover:bg-secondary text-white font-bold py-4 rounded-xl transition shadow-lg shadow-primary/30 transform active:scale-[0.98]">

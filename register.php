@@ -17,6 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $check = $conn->query("SELECT id FROM user WHERE email='$email' UNION SELECT id FROM siswa WHERE nis='$nis'");
     if ($check->num_rows > 0) {
         $error = "Email atau NIS sudah terdaftar!";
+    } elseif (strlen($password) < 6) {
+        $error = "Password harus memiliki minimal 6 karakter!";
     } else {
         $conn->begin_transaction();
 
@@ -136,7 +138,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                            <input type="password" name="password" required class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none">
+                            <input type="password" name="password" required minlength="6" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none">
+                            <p class="text-xs text-slate-500 mt-1">Minimal 6 karakter</p>
                         </div>
                     </div>
                 </div>
