@@ -15,11 +15,13 @@ if (!isset($_GET['id'])) {
 $id_konsultasi = $_GET['id'];
 
 // Fetch Consultation Data (Validation)
-$sql_check = "SELECT k.*, s.nama_lengkap as nama_siswa 
+$stmt_check = $conn->prepare("SELECT k.*, s.nama_lengkap as nama_siswa 
               FROM konsultasi k 
               JOIN siswa s ON k.id_siswa = s.id 
-              WHERE k.id = '$id_konsultasi' AND k.status = 'disetujui'";
-$res_check = $conn->query($sql_check);
+              WHERE k.id = ? AND k.status = 'disetujui'");
+$stmt_check->bind_param("i", $id_konsultasi);
+$stmt_check->execute();
+$res_check = $stmt_check->get_result();
 
 if ($res_check->num_rows == 0) {
     die("Data konsultasi tidak ditemukan atau status belum disetujui.");
