@@ -103,23 +103,47 @@ $list_konselor = $conn->query("SELECT id, nama_lengkap FROM konselor");
 
 // Proses Konsultasi (POST)
 $msg_konsul = "";
+
+// Check for status messages from redirect
+if (isset($_GET['status'])) {
+    if ($_GET['status'] == 'success') {
+        $msg_konsul = "<div class='bg-green-50 text-green-700 px-5 py-4 rounded-xl border border-green-200 mb-8 flex items-center gap-3'><svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>Permintaan konsultasi berhasil dikirim! Tunggu konfirmasi dari guru ya.</div>";
+    } elseif ($_GET['status'] == 'error' && isset($_GET['msg'])) {
+        $msg_konsul = "<div class='bg-red-50 text-red-700 px-5 py-4 rounded-xl border border-red-200 mb-8 flex items-center gap-3'><svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><line x1='15' y1='9' x2='9' y2='15'/><line x1='9' y1='9' x2='15' y2='15'/></svg>" . htmlspecialchars($_GET['msg']) . "</div>";
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_konsul'])) {
     $id_konselor = $_POST['id_konselor'];
     $topik = $_POST['topik'];
     $keluhan = $_POST['keluhan'];
     $tanggal = $_POST['tanggal'];
     $jam = $_POST['jam'];
-
     
     $tgl_waktu = $tanggal . ' ' . $jam . ':00';
+
+    // Server-side Duplicate Check
+    $check_stmt = $conn->prepare("SELECT id FROM konsultasi WHERE id_siswa = ? AND id_konselor = ? AND tanggal_konsultasi = ?");
+    $check_stmt->bind_param("iis", $id_siswa, $id_konselor, $tgl_waktu);
+    $check_stmt->execute();
+    $check_res = $check_stmt->get_result();
+
+    if ($check_res->num_rows > 0) {
+        $error_msg = "Permintaan konsultasi untuk waktu tersebut sudah ada.";
+        header("Location: dashboard_siswa.php?status=error&msg=" . urlencode($error_msg));
+        exit;
+    }
 
     $stmt = $conn->prepare("INSERT INTO konsultasi (id_siswa, id_konselor, kategori_topik, deskripsi_keluhan, tanggal_konsultasi, status) VALUES (?, ?, ?, ?, ?, 'menunggu')");
     $stmt->bind_param("iisss", $id_siswa, $id_konselor, $topik, $keluhan, $tgl_waktu);
     
     if ($stmt->execute()) {
-        $msg_konsul = "<div class='bg-green-50 text-green-700 px-5 py-4 rounded-xl border border-green-200 mb-8 flex items-center gap-3'><svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>Permintaan konsultasi berhasil dikirim! Tunggu konfirmasi dari guru ya.</div>";
+        header("Location: dashboard_siswa.php?status=success");
+        exit;
     } else {
-        $msg_konsul = "<div class='bg-red-50 text-red-700 px-5 py-4 rounded-xl border border-red-200 mb-8 flex items-center gap-3'><svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><line x1='15' y1='9' x2='9' y2='15'/><line x1='9' y1='9' x2='15' y2='15'/></svg>Gagal mengirim permintaan: " . $conn->error . "</div>";
+        $error_msg = "Gagal mengirim permintaan: " . $conn->error;
+        header("Location: dashboard_siswa.php?status=error&msg=" . urlencode($error_msg));
+        exit;
     }
 }
 ?>
@@ -353,7 +377,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_konsul'])) {
             </div>
             
             <div class="p-8 overflow-y-auto custom-scrollbar">
-                <form method="POST" class="space-y-6">
+                <form method="POST" class="space-y-6" onsubmit="this.querySelector('button[type=submit]').disabled = true; this.querySelector('button[type=submit]').innerHTML = 'Mengirim...';">
+                    <input type="hidden" name="submit_konsul" value="1">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Guru BK</label>
                         <div class="relative">
