@@ -26,7 +26,19 @@ while ($row_asesmen = $res_asesmen->fetch_assoc()) {
 
 // Helper function untuk ambil value aman (biar gak error undefined index)
 function getVal($array, $key, $default = '') {
-    return isset($array[$key]) ? $array[$key] : $default;
+    if (!isset($array[$key])) {
+        return $default;
+    }
+    
+    $value = $array[$key];
+    
+    // If it's an array (e.g. checkbox values or section data), return straight
+    if (is_array($value)) {
+        return $value;
+    }
+    
+    // If it's a string, sanitize it
+    return htmlspecialchars($value);
 }
 
 // Helper buat checkbox checked
@@ -50,47 +62,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $saudara        = $_POST['jumlah_saudara'];
     $alamat         = $_POST['alamat'];
 
-    // Cek apakah data keluarga sudah ada sebelumnya atau belum (untuk handle insert/update)
-    // Tapi asumsi fitur ini untuk edit, jadi kita pakai UPDATE. 
-    // Jika user belum pernah isi, logic ini mungkin perlu INSERT. 
-    // Untuk aman, kita pakai INSERT ... ON DUPLICATE KEY UPDATE atau cek dulu.
-    // Sederhananya kita cek $data_keluarga tadi.
-    
     if ($data_keluarga) {
-        $sql_update_keluarga = "UPDATE detail_keluarga_siswa SET 
-            nama_ayah='$nama_ayah', pekerjaan_ayah='$pekerjaan_ayah', 
-            nama_ibu='$nama_ibu', pekerjaan_ibu='$pekerjaan_ibu', 
-            status_ekonomi='$ekonomi', jumlah_saudara='$saudara', alamat='$alamat' 
-            WHERE id_siswa='$id_siswa'";
-        $conn->query($sql_update_keluarga);
+        $stmt = $conn->prepare("UPDATE detail_keluarga_siswa SET nama_ayah=?, pekerjaan_ayah=?, nama_ibu=?, pekerjaan_ibu=?, status_ekonomi=?, jumlah_saudara=?, alamat=? WHERE id_siswa=?");
+        $stmt->bind_param("sssssisi", $nama_ayah, $pekerjaan_ayah, $nama_ibu, $pekerjaan_ibu, $ekonomi, $saudara, $alamat, $id_siswa);
+        $stmt->execute();
     } else {
-        $sql_insert_keluarga = "INSERT INTO detail_keluarga_siswa 
-            (id_siswa, nama_ayah, pekerjaan_ayah, nama_ibu, pekerjaan_ibu, status_ekonomi, jumlah_saudara, alamat) 
-            VALUES 
-            ('$id_siswa', '$nama_ayah', '$pekerjaan_ayah', '$nama_ibu', '$pekerjaan_ibu', '$ekonomi', '$saudara', '$alamat')";
-        $conn->query($sql_insert_keluarga);
+        $stmt = $conn->prepare("INSERT INTO detail_keluarga_siswa (id_siswa, nama_ayah, pekerjaan_ayah, nama_ibu, pekerjaan_ibu, status_ekonomi, jumlah_saudara, alamat) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("isssssis", $id_siswa, $nama_ayah, $pekerjaan_ayah, $nama_ibu, $pekerjaan_ibu, $ekonomi, $saudara, $alamat);
+        $stmt->execute();
     }
 
-    // Update Kepribadian (Kondisi Keluarga)
+    // Helper untuk update hasil asesmen
+    function updateAsesmen($conn, $id_siswa, $kategori, $data, $skor = '-') {
+        $json = json_encode($data);
+        
+        // Delete old data safely
+        $stmt_del = $conn->prepare("DELETE FROM hasil_asesmen WHERE id_siswa=? AND kategori=?");
+        $stmt_del->bind_param("is", $id_siswa, $kategori);
+        $stmt_del->execute();
+
+        // Insert new data safely
+        $stmt_ins = $conn->prepare("INSERT INTO hasil_asesmen (id_siswa, kategori, ringkasan_hasil, skor) VALUES (?, ?, ?, ?)");
+        $stmt_ins->bind_param("isss", $id_siswa, $kategori, $json, $skor);
+        $stmt_ins->execute();
+    }
+
+    // 1. Kepribadian (Kondisi Keluarga)
     $answers_kepribadian = [
         'q1_status_ortu' => $_POST['q1_status_ortu'],
         'q2_status_ortu' => $_POST['q2_status_ortu'],
         'q3_status_ortu' => $_POST['q3_status_ortu'],
         'q4_status_ortu' => $_POST['q4_status_ortu'],
     ];
-    $json_kepribadian = json_encode($answers_kepribadian);
-    // Update or Insert
-    $conn->query("DELETE FROM hasil_asesmen WHERE id_siswa='$id_siswa' AND kategori='kepribadian'");
-    $conn->query("INSERT INTO hasil_asesmen (id_siswa, kategori, ringkasan_hasil, skor) VALUES ('$id_siswa', 'kepribadian', '$json_kepribadian', '-')");
+    updateAsesmen($conn, $id_siswa, 'kepribadian', $answers_kepribadian);
 
-    // Update Gaya Belajar (VAK)
+    // 2. Gaya Belajar (VAK)
     $answers_gaya_belajar = [
         'q1_gaya_belajar' => $_POST['q1_gaya_belajar'],
         'q2_gaya_belajar' => $_POST['q2_gaya_belajar'],
         'q3_gaya_belajar' => $_POST['q3_gaya_belajar'],
         'q4_gaya_belajar' => $_POST['q4_gaya_belajar'],
     ];
-    $json_gaya_belajar = json_encode($answers_gaya_belajar);
     
     // Hitung Skor VAK Ulang
     $vak_scores = ['Visual' => 0, 'Auditori' => 0, 'Kinestetik' => 0];
@@ -99,10 +111,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $dominant_styles = array_keys($vak_scores, $max_score);
     $hasil_skor_vak = (count($dominant_styles) == 1) ? $dominant_styles[0] . " Dominan" : "Kombinasi " . implode(" & ", $dominant_styles);
 
-    $conn->query("DELETE FROM hasil_asesmen WHERE id_siswa='$id_siswa' AND kategori='gaya_belajar'");
-    $conn->query("INSERT INTO hasil_asesmen (id_siswa, kategori, ringkasan_hasil, skor) VALUES ('$id_siswa', 'gaya_belajar', '$json_gaya_belajar', '$hasil_skor_vak')");
+    updateAsesmen($conn, $id_siswa, 'gaya_belajar', $answers_gaya_belajar, $hasil_skor_vak);
 
-    // Update Kesehatan Mental
+    // 3. Kesehatan Mental
     $answers_mental = [
         'q1_nyaman_teman' => $_POST['q1'],
         'q2_cemas' => $_POST['q2'],
@@ -110,23 +121,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         'q4_tekanan_akademik' => $_POST['q4'],
         'q5_bullying' => $_POST['q5']
     ];
-    $json_mental = json_encode($answers_mental);
     $skor_mental = ($answers_mental['q5_bullying'] == 'Ya') ? "PERLU PERHATIAN KHUSUS (Bullying)" : "Stabil";
+    updateAsesmen($conn, $id_siswa, 'kesehatan_mental', $answers_mental, $skor_mental);
 
-    $conn->query("DELETE FROM hasil_asesmen WHERE id_siswa='$id_siswa' AND kategori='kesehatan_mental'");
-    $conn->query("INSERT INTO hasil_asesmen (id_siswa, kategori, ringkasan_hasil, skor) VALUES ('$id_siswa', 'kesehatan_mental', '$json_mental', '$skor_mental')");
-
-    // Update Minat Karir
+    // 4. Minat Karir
     $answers_karir = [
         'rencana_lulus' => $_POST['karir_q1'],
         'mapel_favorit' => isset($_POST['karir_q2']) ? $_POST['karir_q2'] : [],
         'minat_pekerjaan' => $_POST['karir_q3']
     ];
-    $json_karir = json_encode($answers_karir);
     $skor_karir = $answers_karir['rencana_lulus'];
-
-    $conn->query("DELETE FROM hasil_asesmen WHERE id_siswa='$id_siswa' AND kategori='minat_karir'");
-    $conn->query("INSERT INTO hasil_asesmen (id_siswa, kategori, ringkasan_hasil, skor) VALUES ('$id_siswa', 'minat_karir', '$json_karir', '$skor_karir')");
+    updateAsesmen($conn, $id_siswa, 'minat_karir', $answers_karir, $skor_karir);
 
     header("Location: dashboard_siswa.php");
     exit;

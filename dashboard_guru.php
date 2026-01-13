@@ -15,15 +15,25 @@ $guru = $res_guru->fetch_assoc();
 $id_konselor = $guru['id'];
 
 // Action (Terima/Tolak)
+// Action (Terima/Tolak)
 if (isset($_GET['action']) && isset($_GET['id'])) {
     $id_konsul = $_GET['id'];
     $action = $_GET['action'];
     
+    // Validasi status yang diperbolehkan
+    $status_baru = '';
     if ($action == 'approve') {
-        $conn->query("UPDATE konsultasi SET status='disetujui' WHERE id='$id_konsul'");
+        $status_baru = 'disetujui';
     } elseif ($action == 'reject') {
-        $conn->query("UPDATE konsultasi SET status='ditolak' WHERE id='$id_konsul'");
+        $status_baru = 'ditolak';
     }
+
+    if ($status_baru) {
+        $stmt = $conn->prepare("UPDATE konsultasi SET status=? WHERE id=?");
+        $stmt->bind_param("si", $status_baru, $id_konsul);
+        $stmt->execute();
+    }
+    
     header("Location: dashboard_guru.php");
     exit;
 }
