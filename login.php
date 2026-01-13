@@ -7,40 +7,11 @@ if (isset($_SESSION['user_id']) && $_SESSION['peran'] == 'siswa') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masuk - BK Skaju</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Lexend', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: '#6C5CE7',
-                        secondary: '#a55eea',
-                        accent: '#F9F7FF',
-                    },
-                    animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="font-sans antialiased bg-slate-50 min-h-screen flex items-center justify-center p-4">
+<!DOCTYPE html>
+<?php 
+$page_title = "Masuk - BK Skaju";
+include 'includes/header.php'; 
+?>
 
     <div class="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row h-[650px] md:h-[700px]">
         
