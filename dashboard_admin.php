@@ -8,39 +8,83 @@ if (!isset($_SESSION['user_id']) || $_SESSION['peran'] != 'admin') {
 }
 
 $msg = "";
+$edit_data = null;
+
+// Ambil data untuk Edit
+if (isset($_GET['edit_id'])) {
+    $edit_id = $_GET['edit_id'];
+    $res_edit = $conn->query("SELECT k.*, u.email FROM konselor k JOIN user u ON k.id_pengguna = u.id WHERE u.id = '$edit_id'");
+    if ($res_edit->num_rows > 0) {
+        $edit_data = $res_edit->fetch_assoc();
+    }
+}
 
 
-// Proses Tambah Konselor
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_konselor'])) {
+// Proses Tambah / Update Konselor
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && (isset($_POST['add_konselor']) || isset($_POST['edit_konselor']))) {
     $nama = $_POST['nama'];
     $nip = $_POST['nip'];
     $email = $_POST['email'];
     $password = $_POST['password'];
+    $is_edit = isset($_POST['edit_konselor']);
+    $user_id = $is_edit ? $_POST['user_id'] : null;
     
-    $check = $conn->query("SELECT id FROM user WHERE email='$email' UNION SELECT id FROM konselor WHERE nip='$nip'");
+    // Validasi duplikasi NIP/Email (kecuali data yang sedang diedit)
+    $query_check = "SELECT id FROM user WHERE email='$email' " . ($is_edit ? "AND id != '$user_id'" : "");
+    $query_check .= " UNION SELECT id FROM konselor WHERE nip='$nip' " . ($is_edit ? "AND id_pengguna != '$user_id'" : "");
+    
+    $check = $conn->query($query_check);
+    
     if ($check->num_rows > 0) {
         $msg = "<div class='bg-red-100 text-red-600 p-3 rounded mb-4'>Email atau NIP sudah terdaftar!</div>";
     } else {
         $conn->begin_transaction();
         try {
-            $hashed = password_hash($password, PASSWORD_DEFAULT);
-            $stmt_user = $conn->prepare("INSERT INTO user (email, kata_sandi, peran) VALUES (?, ?, 'konselor')");
-            $stmt_user->bind_param("ss", $email, $hashed);
-            $stmt_user->execute();
-            $new_id = $conn->insert_id;
+            if ($is_edit) {
+                // UPDATE
+                if (!empty($password)) {
+                    $hashed = password_hash($password, PASSWORD_DEFAULT);
+                    $stmt_u = $conn->prepare("UPDATE user SET email = ?, kata_sandi = ? WHERE id = ?");
+                    $stmt_u->bind_param("ssi", $email, $hashed, $user_id);
+                } else {
+                    $stmt_u = $conn->prepare("UPDATE user SET email = ? WHERE id = ?");
+                    $stmt_u->bind_param("si", $email, $user_id);
+                }
+                $stmt_u->execute();
 
-            $spesialisasi = "Konselor Umum";
-            $stmt_k = $conn->prepare("INSERT INTO konselor (id_pengguna, nip, nama_lengkap, spesialisasi) VALUES (?, ?, ?, ?)");
-            $stmt_k->bind_param("isss", $new_id, $nip, $nama, $spesialisasi);
-            $stmt_k->execute();
+                $stmt_k = $conn->prepare("UPDATE konselor SET nip = ?, nama_lengkap = ? WHERE id_pengguna = ?");
+                $stmt_k->bind_param("ssi", $nip, $nama, $user_id);
+                $stmt_k->execute();
+                
+                $conn->commit();
+                header("Location: dashboard_admin.php?status=updated");
+                exit;
+            } else {
+                // INSERT
+                $hashed = password_hash($password, PASSWORD_DEFAULT);
+                $stmt_user = $conn->prepare("INSERT INTO user (email, kata_sandi, peran) VALUES (?, ?, 'konselor')");
+                $stmt_user->bind_param("ss", $email, $hashed);
+                $stmt_user->execute();
+                $new_id = $conn->insert_id;
 
-            $conn->commit();
-            $msg = "<div class='bg-green-100 text-green-600 p-3 rounded mb-4'>Konselor berhasil ditambahkan!</div>";
+                $spesialisasi = "Konselor Umum";
+                $stmt_k = $conn->prepare("INSERT INTO konselor (id_pengguna, nip, nama_lengkap, spesialisasi) VALUES (?, ?, ?, ?)");
+                $stmt_k->bind_param("isss", $new_id, $nip, $nama, $spesialisasi);
+                $stmt_k->execute();
+
+                $conn->commit();
+                $msg = "<div class='bg-green-100 text-green-600 p-3 rounded mb-4'>Konselor berhasil ditambahkan!</div>";
+            }
         } catch (Exception $e) {
             $conn->rollback();
             $msg = "<div class='bg-red-100 text-red-600 p-3 rounded mb-4'>Error: " . $e->getMessage() . "</div>";
         }
     }
+}
+
+// Pesan Sukses Update
+if (isset($_GET['status']) && $_GET['status'] == 'updated') {
+    $msg = "<div class='bg-green-100 text-green-600 p-3 rounded mb-4'>Data konselor berhasil diupdate!</div>";
 }
 
 // Proses Hapus Konselor
@@ -78,28 +122,36 @@ $res_list = $conn->query($sql_list);
             
             <div class="w-full md:w-1/3">
                 <div class="bg-white p-6 rounded-xl shadow-sm border">
-                    <h2 class="font-bold text-lg text-slate-700 mb-4">Tambah Konselor</h2>
+                    <h2 class="font-bold text-lg text-slate-700 mb-4"><?= $edit_data ? 'Edit Konselor' : 'Tambah Konselor' ?></h2>
                     <?= $msg ?>
                     <form method="POST" class="space-y-4">
+                        <?php if ($edit_data): ?>
+                            <input type="hidden" name="user_id" value="<?= $edit_data['id_pengguna'] ?>">
+                        <?php endif; ?>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase">Nama Lengkap</label>
-                            <input type="text" name="nama" required class="w-full border rounded px-3 py-2">
+                            <input type="text" name="nama" required class="w-full border rounded px-3 py-2" value="<?= $edit_data['nama_lengkap'] ?? '' ?>">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase">NIP</label>
-                            <input type="text" name="nip" required class="w-full border rounded px-3 py-2">
+                            <input type="text" name="nip" required class="w-full border rounded px-3 py-2" value="<?= $edit_data['nip'] ?? '' ?>">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase">Email Login</label>
-                            <input type="email" name="email" required class="w-full border rounded px-3 py-2">
+                            <input type="email" name="email" required class="w-full border rounded px-3 py-2" value="<?= $edit_data['email'] ?? '' ?>">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase">Password</label>
-                            <input type="text" name="password" required class="w-full border rounded px-3 py-2" placeholder="Contoh: guru123">
+                            <label class="block text-xs font-bold text-slate-500 uppercase">Password <?= $edit_data ? '(Kosongkan jika tidak ubah)' : '' ?></label>
+                            <input type="text" name="password" <?= $edit_data ? '' : 'required' ?> class="w-full border rounded px-3 py-2" placeholder="<?= $edit_data ? '••••••••' : 'Contoh: guru123' ?>">
                         </div>
-                        <button type="submit" name="add_konselor" class="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 transition">
-                            + Tambah Akun
-                        </button>
+                        <div class="flex gap-2">
+                            <button type="submit" name="<?= $edit_data ? 'edit_konselor' : 'add_konselor' ?>" class="flex-1 bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 transition">
+                                <?= $edit_data ? 'Simpan Perubahan' : '+ Tambah Akun' ?>
+                            </button>
+                            <?php if ($edit_data): ?>
+                                <a href="dashboard_admin.php" class="bg-slate-200 text-slate-600 font-bold py-2 px-4 rounded hover:bg-slate-300 transition text-center">Batal</a>
+                            <?php endif; ?>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -125,7 +177,10 @@ $res_list = $conn->query($sql_list);
                                         <td class="px-4 py-3"><?= $row['nip'] ?></td>
                                         <td class="px-4 py-3"><?= $row['email'] ?></td>
                                         <td class="px-4 py-3">
-                                            <a href="?delete_id=<?= $row['id_pengguna'] ?>" onclick="return confirm('Hapus akun ini?')" class="text-red-500 hover:underline">Hapus</a>
+                                            <div class="flex gap-3">
+                                                <a href="?edit_id=<?= $row['id_pengguna'] ?>" class="text-blue-500 hover:underline">Edit</a>
+                                                <a href="?delete_id=<?= $row['id_pengguna'] ?>" onclick="return confirm('Hapus akun ini?')" class="text-red-500 hover:underline">Hapus</a>
+                                            </div>
                                         </td>
                                     </tr>
                                     <?php endwhile; ?>
