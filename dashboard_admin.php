@@ -233,7 +233,7 @@ if (isset($_GET['status']) && $_GET['status'] == 'updated') {
             </div>
             <div class="flex items-center gap-6">
                 <div class="hidden md:flex flex-col items-end">
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Logged in as</span>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Logged in sebagai</span>
                     <span class="text-sm font-bold text-slate-700">Administrator</span>
                 </div>
                 <div class="h-10 w-px bg-slate-200 hidden md:block"></div>
