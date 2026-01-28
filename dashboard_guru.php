@@ -63,15 +63,16 @@ $sql_requests = "
 ";
 $res_requests = $conn->query($sql_requests);
 
-// Jadwal Mendatang (Disetujui)
+// Jadwal Mendatang (Disetujui) + Selesai (untuk akses laporan)
 $sql_schedule = "
     SELECT k.*, s.nama_lengkap 
     FROM konsultasi k 
     JOIN siswa s ON k.id_siswa = s.id 
-    WHERE k.id_konselor = '$id_konselor' AND k.status = 'disetujui' AND k.tanggal_konsultasi >= NOW() 
-    ORDER BY k.tanggal_konsultasi ASC
+    WHERE k.id_konselor = '$id_konselor' AND (k.status = 'disetujui' OR k.status = 'selesai')
+    ORDER BY k.tanggal_konsultasi DESC
 ";
 $res_schedule = $conn->query($sql_schedule);
+
 ?>
 
 <!DOCTYPE html>
@@ -169,7 +170,7 @@ $res_schedule = $conn->query($sql_schedule);
             </div>
 
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-[#F9F7FF] h-full">
-                <h3 class="font-bold text-lg text-slate-700 mb-6 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-icon lucide-calendar text-[#6C5CE7]"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg> Jadwal Mendatang</h3>
+                <h3 class="font-bold text-lg text-slate-700 mb-6 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-icon lucide-calendar text-[#6C5CE7]"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg> Jadwal & Riwayat Sesi</h3>
                 <div class="rounded-xl overflow-hidden">
                     <?php if($res_schedule->num_rows > 0): ?>
                         <div class="space-y-4">
@@ -187,9 +188,16 @@ $res_schedule = $conn->query($sql_schedule);
                                         </h4>
                                         <p class="text-sm text-slate-500"><?= date('H:i', strtotime($sch['tanggal_konsultasi'])) ?> WIB • <?= $sch['kategori_topik'] ?></p>
                                     </div>
-                                    <a href="tulis_laporan.php?id=<?= $sch['id'] ?>" class="bg-white border border-slate-200 text-slate-600 hover:text-[#6C5CE7] hover:border-[#6C5CE7] px-3 py-2 rounded-lg text-xs font-bold transition">
-                                        Isi Laporan
-                                    </a>
+                                    <?php if($sch['status'] == 'selesai'): ?>
+                                        <a href="laporan_konsultasi.php?id=<?= $sch['id'] ?>" class="bg-green-50 border border-green-200 text-green-700 hover:bg-green-100 px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                            Lihat Laporan
+                                        </a>
+                                    <?php else: ?>
+                                        <a href="tulis_laporan.php?id=<?= $sch['id'] ?>" class="bg-white border border-slate-200 text-slate-600 hover:text-[#6C5CE7] hover:border-[#6C5CE7] px-3 py-2 rounded-lg text-xs font-bold transition">
+                                            Isi Laporan
+                                        </a>
+                                    <?php endif; ?>
                                 </div>
                             <?php endwhile; ?>
                         </div>

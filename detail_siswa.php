@@ -44,7 +44,7 @@ $history_dates = [];
 $history_scores = [];
 while ($h = $res_history->fetch_assoc()) {
     $history_dates[] = date('d/m', strtotime($h['terakhir_diperbarui']));
-    $history_scores[] = $h['skor_numerik'] ?? ($h['skor'] == 'Stabil' ? 80 : 40);
+    $history_scores[] = $h['skor_numerik'] ?? 0;
 }
 
 
