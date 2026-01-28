@@ -76,10 +76,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     function updateAsesmen($conn, $id_siswa, $kategori, $data, $skor = '-') {
         $json = json_encode($data);
         
-        // Delete old data safely
-        $stmt_del = $conn->prepare("DELETE FROM hasil_asesmen WHERE id_siswa=? AND kategori=?");
-        $stmt_del->bind_param("is", $id_siswa, $kategori);
-        $stmt_del->execute();
+        // Only delete old data if NOT kesehatan_mental (preserve history for progress chart)
+        if ($kategori != 'kesehatan_mental') {
+            $stmt_del = $conn->prepare("DELETE FROM hasil_asesmen WHERE id_siswa=? AND kategori=?");
+            $stmt_del->bind_param("is", $id_siswa, $kategori);
+            $stmt_del->execute();
+        }
 
         // Insert new data safely
         $stmt_ins = $conn->prepare("INSERT INTO hasil_asesmen (id_siswa, kategori, ringkasan_hasil, skor) VALUES (?, ?, ?, ?)");

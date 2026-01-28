@@ -37,6 +37,17 @@ while ($row = $res_asesmen->fetch_assoc()) {
     $skor_asesmen[$row['kategori']] = $row['skor'];
 }
 
+// 3. Ambil History Mental Health untuk Chart
+$sql_history = "SELECT skor_numerik, terakhir_diperbarui FROM hasil_asesmen WHERE id_siswa = '$id_siswa' AND kategori = 'kesehatan_mental' ORDER BY terakhir_diperbarui ASC";
+$res_history = $conn->query($sql_history);
+$history_dates = [];
+$history_scores = [];
+while ($h = $res_history->fetch_assoc()) {
+    $history_dates[] = date('d/m', strtotime($h['terakhir_diperbarui']));
+    $history_scores[] = $h['skor_numerik'] ?? ($h['skor'] == 'Stabil' ? 80 : 40);
+}
+
+
 // Helper
 function getVal($array, $key, $default = '-') {
     return isset($array[$key]) ? $array[$key] : $default;
@@ -54,6 +65,7 @@ function showArray($array) {
     <title>Detail Siswa - <?= htmlspecialchars($data_siswa['nama_lengkap']) ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>.lexend-font { font-family: "Lexend", sans-serif; }</style>
 </head>
 <body class="bg-slate-50 lexend-font py-10">
@@ -194,7 +206,20 @@ function showArray($array) {
                         </span>
                     </div>
                 </div>
+
+                <!-- Progress Chart for Counselor -->
+                <div class="mt-8 bg-slate-50 p-6 rounded-xl border border-slate-100">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Grafik Trend Kesehatan Mental</h4>
+                    <div class="h-48 w-full">
+                        <?php if (count($history_scores) > 0): ?>
+                            <canvas id="mentalChart"></canvas>
+                        <?php else: ?>
+                            <p class="text-sm text-slate-400 text-center py-10">Belum ada data history.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </section>
+
 
             <!-- 5. Minat Karir -->
             <?php $mk = getVal($data_asesmen, 'minat_karir', []); ?>
@@ -219,5 +244,33 @@ function showArray($array) {
         </div>
     </div>
 
+    <script>
+        <?php if (count($history_scores) > 0): ?>
+        new Chart(document.getElementById('mentalChart'), {
+            type: 'line',
+            data: {
+                labels: <?= json_encode($history_dates) ?>,
+                datasets: [{
+                    label: 'Skor',
+                    data: <?= json_encode($history_scores) ?>,
+                    borderColor: '#3b82f6',
+                    tension: 0.3,
+                    fill: false,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, max: 100, display: false },
+                    x: { grid: { display: false }, ticks: { font: { size: 9 } } }
+                }
+            }
+        });
+        <?php endif; ?>
+    </script>
 </body>
 </html>
+

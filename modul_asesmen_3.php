@@ -18,6 +18,24 @@ if ($check_prev->num_rows == 0) {
     exit;
 }
 
+// Fetch Latest Data for Prefilling
+$sql_last_mental = "SELECT ringkasan_hasil FROM hasil_asesmen WHERE id_siswa='$id_siswa' AND kategori='kesehatan_mental' ORDER BY terakhir_diperbarui DESC LIMIT 1";
+$res_last_mental = $conn->query($sql_last_mental);
+$last_mental = ($res_last_mental->num_rows > 0) ? json_decode($res_last_mental->fetch_assoc()['ringkasan_hasil'], true) : [];
+
+$sql_last_karir = "SELECT ringkasan_hasil FROM hasil_asesmen WHERE id_siswa='$id_siswa' AND kategori='minat_karir' ORDER BY terakhir_diperbarui DESC LIMIT 1";
+$res_last_karir = $conn->query($sql_last_karir);
+$last_karir = ($res_last_karir->num_rows > 0) ? json_decode($res_last_karir->fetch_assoc()['ringkasan_hasil'], true) : [];
+
+// Helper Function for checking inputs
+function isChecked($array, $key, $value) {
+    if (!isset($array[$key])) return '';
+    if (is_array($array[$key])) {
+        return in_array($value, $array[$key]) ? 'checked' : '';
+    }
+    return $array[$key] == $value ? 'checked' : '';
+}
+
 // Proses Submit
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Bagian Kesehatan Mental
@@ -30,7 +48,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     ];
     $json_mental = json_encode($answers_mental);
 
+    // Hitung Skor Numerik (0-100)
+    // Base 50, + atau - berdasarkan jawaban
+    $score_val = 50;
+    if ($answers_mental['q1_nyaman_teman'] == 'Ya') $score_val += 10; else $score_val -= 5;
+    if ($answers_mental['q2_cemas'] == 'Tidak') $score_val += 10; else $score_val -= 10;
+    if ($answers_mental['q3_cerita'] == 'Ya') $score_val += 10; else $score_val -= 5;
+    if ($answers_mental['q4_tekanan_akademik'] == 'Tidak') $score_val += 10; else $score_val -= 10;
+    
+    // Critical Weight for Bullying
+    if ($answers_mental['q5_bullying'] == 'Tidak') {
+        $score_val += 10;
+    } else {
+        $score_val -= 20;
+    }
+
+    // Clamp score between 0-100
+    $score_val = max(0, min(100, $score_val));
+
     $skor_mental = "Stabil";
+    if ($score_val < 60) {
+        $skor_mental = "Perlu Perhatian";
+    }
     if ($answers_mental['q5_bullying'] == 'Ya') {
         $skor_mental = "PERLU PERHATIAN KHUSUS (Bullying)";
     }
@@ -47,8 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $skor_karir = $answers_karir['rencana_lulus'];
 
     // Insert ke database
-    $sql_mental = "INSERT INTO hasil_asesmen (id_siswa, kategori, ringkasan_hasil, skor) 
-                   VALUES ('$id_siswa', 'kesehatan_mental', '$json_mental', '$skor_mental')";
+    $sql_mental = "INSERT INTO hasil_asesmen (id_siswa, kategori, ringkasan_hasil, skor, skor_numerik) 
+                   VALUES ('$id_siswa', 'kesehatan_mental', '$json_mental', '$skor_mental', '$score_val')";
     
     $sql_karir = "INSERT INTO hasil_asesmen (id_siswa, kategori, ringkasan_hasil, skor) 
                   VALUES ('$id_siswa', 'minat_karir', '$json_karir', '$skor_karir')";
@@ -112,40 +151,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="space-y-2">
                     <label class="block text-slate-700 font-medium">1. Saya merasa nyaman dan punya teman di sekolah.</label>
                     <div class="flex gap-6">
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="q1" value="Ya" class="form-radio text-teal-600" required> <span class="ml-2 text-slate-600">Ya</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="q1" value="Tidak" class="form-radio text-teal-600"> <span class="ml-2 text-slate-600">Tidak</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="q1" value="Ya" class="form-radio text-teal-600" <?= isChecked($last_mental, 'q1_nyaman_teman', 'Ya') ?> required> <span class="ml-2 text-slate-600">Ya</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="q1" value="Tidak" class="form-radio text-teal-600" <?= isChecked($last_mental, 'q1_nyaman_teman', 'Tidak') ?>> <span class="ml-2 text-slate-600">Tidak</span></label>
                     </div>
                 </div>
 
                 <div class="space-y-2">
                     <label class="block text-slate-700 font-medium">2. Saya sering merasa cemas berlebihan tanpa sebab yang jelas.</label>
                     <div class="flex gap-6">
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="q2" value="Ya" class="form-radio text-teal-600" required> <span class="ml-2 text-slate-600">Ya</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="q2" value="Tidak" class="form-radio text-teal-600"> <span class="ml-2 text-slate-600">Tidak</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="q2" value="Ya" class="form-radio text-teal-600" <?= isChecked($last_mental, 'q2_cemas', 'Ya') ?> required> <span class="ml-2 text-slate-600">Ya</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="q2" value="Tidak" class="form-radio text-teal-600" <?= isChecked($last_mental, 'q2_cemas', 'Tidak') ?>> <span class="ml-2 text-slate-600">Tidak</span></label>
                     </div>
                 </div>
 
                 <div class="space-y-2">
                     <label class="block text-slate-700 font-medium">3. Saya merasa mudah untuk bercerita masalah saya ke orang lain.</label>
                     <div class="flex gap-6">
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="q3" value="Ya" class="form-radio text-teal-600" required> <span class="ml-2 text-slate-600">Ya</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="q3" value="Tidak" class="form-radio text-teal-600"> <span class="ml-2 text-slate-600">Tidak</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="q3" value="Ya" class="form-radio text-teal-600" <?= isChecked($last_mental, 'q3_cerita', 'Ya') ?> required> <span class="ml-2 text-slate-600">Ya</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="q3" value="Tidak" class="form-radio text-teal-600" <?= isChecked($last_mental, 'q3_cerita', 'Tidak') ?>> <span class="ml-2 text-slate-600">Tidak</span></label>
                     </div>
                 </div>
 
                 <div class="space-y-2">
                     <label class="block text-slate-700 font-medium">4. Saya merasa tertekan dengan tuntutan nilai akademik.</label>
                     <div class="flex gap-6">
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="q4" value="Ya" class="form-radio text-teal-600" required> <span class="ml-2 text-slate-600">Ya</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="q4" value="Tidak" class="form-radio text-teal-600"> <span class="ml-2 text-slate-600">Tidak</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="q4" value="Ya" class="form-radio text-teal-600" <?= isChecked($last_mental, 'q4_tekanan_akademik', 'Ya') ?> required> <span class="ml-2 text-slate-600">Ya</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="q4" value="Tidak" class="form-radio text-teal-600" <?= isChecked($last_mental, 'q4_tekanan_akademik', 'Tidak') ?>> <span class="ml-2 text-slate-600">Tidak</span></label>
                     </div>
                 </div>
 
                 <div class="space-y-2 bg-red-50 p-4 rounded-lg border border-red-100">
                     <label class="block text-red-800 font-bold">5. Saya pernah atau sedang mengalami perundungan (bullying) di sekolah.</label>
                     <div class="flex gap-6 mt-2">
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="q5" value="Ya" class="form-radio text-red-600" required> <span class="ml-2 text-red-700 font-medium">Ya</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="q5" value="Tidak" class="form-radio text-red-600"> <span class="ml-2 text-red-700 font-medium">Tidak</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="q5" value="Ya" class="form-radio text-red-600" <?= isChecked($last_mental, 'q5_bullying', 'Ya') ?> required> <span class="ml-2 text-red-700 font-medium">Ya</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="q5" value="Tidak" class="form-radio text-red-600" <?= isChecked($last_mental, 'q5_bullying', 'Tidak') ?>> <span class="ml-2 text-red-700 font-medium">Tidak</span></label>
                     </div>
                 </div>
             </div>
@@ -156,34 +195,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="space-y-2">
                     <label class="block text-slate-700 font-medium">1. Rencana setelah lulus sekolah?</label>
                     <div class="flex flex-col space-y-2">
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q1" value="Kuliah" class="form-radio text-blue-600" required> <span class="ml-2 text-slate-600">Kuliah</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q1" value="Kerja/Wirausaha" class="form-radio text-blue-600"> <span class="ml-2 text-slate-600">Kerja/Wirausaha</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q1" value="Sekolah Kedinasan" class="form-radio text-blue-600"> <span class="ml-2 text-slate-600">Sekolah Kedinasan</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q1" value="Belum Tahu/Bingung" class="form-radio text-blue-600"> <span class="ml-2 text-slate-600">Belum Tahu/Bingung</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q1" value="Kuliah" class="form-radio text-blue-600" <?= isChecked($last_karir, 'rencana_lulus', 'Kuliah') ?> required> <span class="ml-2 text-slate-600">Kuliah</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q1" value="Kerja/Wirausaha" class="form-radio text-blue-600" <?= isChecked($last_karir, 'rencana_lulus', 'Kerja/Wirausaha') ?>> <span class="ml-2 text-slate-600">Kerja/Wirausaha</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q1" value="Sekolah Kedinasan" class="form-radio text-blue-600" <?= isChecked($last_karir, 'rencana_lulus', 'Sekolah Kedinasan') ?>> <span class="ml-2 text-slate-600">Sekolah Kedinasan</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q1" value="Belum Tahu/Bingung" class="form-radio text-blue-600" <?= isChecked($last_karir, 'rencana_lulus', 'Belum Tahu/Bingung') ?>> <span class="ml-2 text-slate-600">Belum Tahu/Bingung</span></label>
                     </div>
                 </div>
 
                 <div class="space-y-2">
                     <label class="block text-slate-700 font-medium">2. Mata Pelajaran Favorit (Pilih maks 3)</label>
                     <div class="flex flex-col space-y-2">
-                        <label class="flex items-center cursor-pointer"><input type="checkbox" name="karir_q2[]" value="Matematika" class="form-checkbox text-blue-600"> <span class="ml-2 text-slate-600">Matematika</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="checkbox" name="karir_q2[]" value="Olahraga" class="form-checkbox text-blue-600"> <span class="ml-2 text-slate-600">Olahraga</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="checkbox" name="karir_q2[]" value="KK" class="form-checkbox text-blue-600"> <span class="ml-2 text-slate-600">KK (Kejuruan)</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="checkbox" name="karir_q2[]" value="Bahasa Indonesia" class="form-checkbox text-blue-600"> <span class="ml-2 text-slate-600">Bahasa Indonesia</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="checkbox" name="karir_q2[]" value="Agama" class="form-checkbox text-blue-600"> <span class="ml-2 text-slate-600">Agama</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="checkbox" name="karir_q2[]" value="MPP" class="form-checkbox text-blue-600"> <span class="ml-2 text-slate-600">MPP</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="checkbox" name="karir_q2[]" value="Bahasa Inggris" class="form-checkbox text-blue-600"> <span class="ml-2 text-slate-600">Bahasa Inggris</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="checkbox" name="karir_q2[]" value="Matematika" class="form-checkbox text-blue-600" <?= isChecked($last_karir, 'mapel_favorit', 'Matematika') ?>> <span class="ml-2 text-slate-600">Matematika</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="checkbox" name="karir_q2[]" value="Olahraga" class="form-checkbox text-blue-600" <?= isChecked($last_karir, 'mapel_favorit', 'Olahraga') ?>> <span class="ml-2 text-slate-600">Olahraga</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="checkbox" name="karir_q2[]" value="KK" class="form-checkbox text-blue-600" <?= isChecked($last_karir, 'mapel_favorit', 'KK') ?>> <span class="ml-2 text-slate-600">KK (Kejuruan)</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="checkbox" name="karir_q2[]" value="Bahasa Indonesia" class="form-checkbox text-blue-600" <?= isChecked($last_karir, 'mapel_favorit', 'Bahasa Indonesia') ?>> <span class="ml-2 text-slate-600">Bahasa Indonesia</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="checkbox" name="karir_q2[]" value="Agama" class="form-checkbox text-blue-600" <?= isChecked($last_karir, 'mapel_favorit', 'Agama') ?>> <span class="ml-2 text-slate-600">Agama</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="checkbox" name="karir_q2[]" value="MPP" class="form-checkbox text-blue-600" <?= isChecked($last_karir, 'mapel_favorit', 'MPP') ?>> <span class="ml-2 text-slate-600">MPP</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="checkbox" name="karir_q2[]" value="Bahasa Inggris" class="form-checkbox text-blue-600" <?= isChecked($last_karir, 'mapel_favorit', 'Bahasa Inggris') ?>> <span class="ml-2 text-slate-600">Bahasa Inggris</span></label>
                     </div>
                 </div>
 
                 <div class="space-y-2">
                     <label class="block text-slate-700 font-medium">3. Bidang pekerjaan yang menarik minatmu?</label>
                     <div class="flex flex-col space-y-2">
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q3" value="Teknik & Komputer" class="form-radio text-blue-600" required> <span class="ml-2 text-slate-600">Teknik & Komputer</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q3" value="Kesehatan" class="form-radio text-blue-600"> <span class="ml-2 text-slate-600">Kesehatan</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q3" value="Seni & Kreatif" class="form-radio text-blue-600"> <span class="ml-2 text-slate-600">Seni & Kreatif</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q3" value="Sosial & Hukum" class="form-radio text-blue-600"> <span class="ml-2 text-slate-600">Sosial & Hukum</span></label>
-                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q3" value="Bisnis & Manajemen" class="form-radio text-blue-600"> <span class="ml-2 text-slate-600">Bisnis & Manajemen</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q3" value="Teknik & Komputer" class="form-radio text-blue-600" <?= isChecked($last_karir, 'minat_pekerjaan', 'Teknik & Komputer') ?> required> <span class="ml-2 text-slate-600">Teknik & Komputer</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q3" value="Kesehatan" class="form-radio text-blue-600" <?= isChecked($last_karir, 'minat_pekerjaan', 'Kesehatan') ?>> <span class="ml-2 text-slate-600">Kesehatan</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q3" value="Seni & Kreatif" class="form-radio text-blue-600" <?= isChecked($last_karir, 'minat_pekerjaan', 'Seni & Kreatif') ?>> <span class="ml-2 text-slate-600">Seni & Kreatif</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q3" value="Sosial & Hukum" class="form-radio text-blue-600" <?= isChecked($last_karir, 'minat_pekerjaan', 'Sosial & Hukum') ?>> <span class="ml-2 text-slate-600">Sosial & Hukum</span></label>
+                        <label class="flex items-center cursor-pointer"><input type="radio" name="karir_q3" value="Bisnis & Manajemen" class="form-radio text-blue-600" <?= isChecked($last_karir, 'minat_pekerjaan', 'Bisnis & Manajemen') ?>> <span class="ml-2 text-slate-600">Bisnis & Manajemen</span></label>
                     </div>
                 </div>
             </div>

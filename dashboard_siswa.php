@@ -79,6 +79,11 @@ if ($vak_data) {
     }
 }
 
+// Fetch Latest Mental Health Score
+$sql_mental = "SELECT skor, skor_numerik FROM hasil_asesmen WHERE id_siswa = '$id_siswa' AND kategori = 'kesehatan_mental' ORDER BY id DESC LIMIT 1";
+$res_mental = $conn->query($sql_mental);
+$mental_data = $res_mental->fetch_assoc();
+
 // Fetch Schedules
 $sql_schedule = "
     SELECT k.*, c.nama_lengkap as nama_konselor 
@@ -292,6 +297,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_konsul'])) {
                         </div>
                     <?php endif; ?>
 
+                </div>
+
+                <!-- Mental Health Summary (Moved Here) -->
+                <div class="bg-gradient-to-br from-teal-50 to-white p-6 rounded-3xl border border-teal-100/50 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-teal-100/50 rounded-bl-full -mr-8 -mt-8 z-0"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-teal-600 shadow-sm border border-teal-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M10 15c.65.66 1.55 1 2.5 1s1.85-.34 2.5-1"/></svg>
+                            </div>
+                            <?php if ($mental_data && isset($mental_data['skor_numerik'])): ?>
+                            <span class="text-2xl font-bold text-teal-600"><?= $mental_data['skor_numerik'] ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-base mb-1">Kesehatan Mental</h4>
+                        <p class="text-slate-500 text-xs mb-4">Status: <span class="font-semibold text-teal-600"><?= $mental_data['skor'] ?? 'Belum ada data' ?></span></p>
+                        
+                        <a href="progress_kesehatan.php" class="inline-flex items-center gap-2 text-xs font-bold text-teal-600 hover:text-teal-700 hover:underline">
+                            Lihat Progress Grafik 
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                        </a>
+                    </div>
                 </div>
             </div>
 
