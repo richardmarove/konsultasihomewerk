@@ -221,11 +221,7 @@ if (isset($_GET['status']) && $_GET['status'] == 'updated') {
     <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-[100] border-b border-slate-200">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="bg-blue-600 p-2.5 rounded-xl shadow-lg shadow-blue-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.040L3 20l9 2 9-2-1.382-14.016z" />
-                    </svg>
-                </div>
+
                 <div>
                     <h1 class="plus-jakarta font-extrabold text-xl text-slate-900 leading-tight">BK<span class="text-blue-600">Skaju</span></h1>
                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] leading-none">Management Portal</p>
