@@ -53,7 +53,17 @@ $wellness_stats = [
     'Stabil' => 0,
     'Berisiko' => 0
 ];
-$sql_wellness = "SELECT skor FROM hasil_asesmen WHERE kategori = 'kesehatan_mental'";
+$sql_wellness = "
+    SELECT ha.skor 
+    FROM hasil_asesmen ha
+    INNER JOIN (
+        SELECT id_siswa, MAX(terakhir_diperbarui) as max_date
+        FROM hasil_asesmen
+        WHERE kategori = 'kesehatan_mental'
+        GROUP BY id_siswa
+    ) latest ON ha.id_siswa = latest.id_siswa AND ha.terakhir_diperbarui = latest.max_date
+    WHERE ha.kategori = 'kesehatan_mental'
+";
 $res_wellness = $conn->query($sql_wellness);
 if ($res_wellness && $res_wellness->num_rows > 0) {
     while($row = $res_wellness->fetch_assoc()) {
@@ -148,7 +158,7 @@ $res_schedule = $conn->query($sql_schedule);
     <div class="container mx-auto p-6">
         
         <!-- ANALYTICS SECTION -->
-        <h2 class="text-xl font-bold text-slate-700 mb-6">Analytics & Insights</h2>
+        <h2 class="text-xl font-bold text-slate-700 mb-6">Analitik dan Wawasan</h2>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
             <!-- Wellness Distribution Chart -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2 flex flex-col md:flex-row items-center gap-8">
